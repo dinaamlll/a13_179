@@ -53,7 +53,7 @@ object DestinasiHomePeserta: DestinasiNavigasi {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomePesertaScreen(
-    navigateToPesertaEntry:()->Unit,
+    navigateToItemEntryPeserta:()->Unit,
     modifier: Modifier=Modifier,
     onDetailClickPeserta: (String) -> Unit ={},
     viewModel: HomePesertaViewModel = viewModel(factory = PenyediaViewModel.Factory)
@@ -74,7 +74,7 @@ fun HomePesertaScreen(
         },
         floatingActionButton = { //`FloatingActionButton` untuk navigasi ke entri peserta.
             FloatingActionButton(
-                onClick = navigateToPesertaEntry,
+                onClick = navigateToItemEntryPeserta,
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.padding(18.dp)
             ) {
@@ -83,7 +83,7 @@ fun HomePesertaScreen(
         },
     ) { innerPadding->
         HomeStatus(
-            homePesertaUiState = viewModel.PesertaUIState,
+            homePesertaUiState = viewModel.psrtaUIState,
             retryAction = {viewModel.getPsrta()}, modifier = Modifier.padding(innerPadding),
             onDetailClickPeserta = onDetailClickPeserta,onDeleteClickPeserta = {
                 viewModel.deletePsrta(it.id_peserta)
