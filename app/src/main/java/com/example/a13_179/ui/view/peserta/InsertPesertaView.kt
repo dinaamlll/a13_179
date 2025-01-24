@@ -42,9 +42,9 @@ fun EntryPesertaScreen(
             )
         }
     ) { innerPadding ->
-        EntryBodyPeserta(
+        EntryBodyPeserta( //EntryBody untuk form input data peserta dengan tombol simpan.
             insertPesertaUiState = viewModel.uiState,
-            onMahasiswaValueChange = viewModel::updateInserPsrtaState,
+            onPesertaValueChange = viewModel::updateInserPsrtaState,
             onSaveClick = {
                 coroutineScope.launch {
                     viewModel.insertPsrta()
