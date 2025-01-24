@@ -9,7 +9,7 @@ interface EventRepository {
     suspend fun insertEvent(event: Event)
     suspend fun updateEvent(id_event: Int, event: Event)
     suspend fun deleteEvent(id_event: Int)
-    suspend fun getEventById(id: Int): Event?
+    suspend fun getEventById(id_event: Int): Event?
 
 }
 
