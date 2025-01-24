@@ -43,6 +43,7 @@ import com.example.a13_179.ui.view.event.OnError
 import com.example.a13_179.ui.view.event.OnLoading
 import com.example.a13_179.ui.viewmodel.event.PenyediaViewModel
 import com.example.a13_179.ui.viewmodel.peserta.HomePesertaViewModel
+import com.example.a13_179.ui.viewmodel.peserta.HomeUiStatePeserta
 
 
 object DestinasiHomePeserta: DestinasiNavigasi {
@@ -94,17 +95,17 @@ fun HomePesertaScreen(
 }
 @Composable
 fun HomeStatus(
-    homePesertaUiState: HomePesertaUiState,
+    homePesertaUiState: HomeUiStatePeserta,
     retryAction: () -> Unit,
     modifier: Modifier = Modifier,
     onDeleteClickPeserta: (Peserta) -> Unit = {},
     onDetailClickPeserta: (String) -> Unit
 ){
     when (homePesertaUiState){
-        is HomePesertaUiState.Loading-> OnLoading(modifier = modifier.fillMaxSize())
+        is HomeUiStatePeserta.Loading-> OnLoading(modifier = modifier.fillMaxSize())
 
-        is HomePesertaUiState.Success ->
-            if(homeUiState.peserta.isEmpty()){
+        is HomeUiStatePeserta.Success ->
+            if(homePesertaUiState.peserta.isEmpty()){
                 return Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center){
                     Text(text = "Tidak ada data kontak")
                 }
@@ -119,7 +120,7 @@ fun HomeStatus(
                     }
                 )
             }
-        is HomePesertaUiState.Error -> OnError(retryAction, modifier = modifier.fillMaxSize())
+        is HomeUiStatePeserta.Error -> OnError(retryAction, modifier = modifier.fillMaxSize())
     }
 }
 /**
