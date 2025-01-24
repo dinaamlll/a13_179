@@ -16,7 +16,7 @@ class InsertPesertaViewModel(private val psrta: PesertaRepository) : ViewModel()
         PesertauiState = InsertPesertaUiState(insertPesertaUiEvent =insertPesertaUiEvent)
     }
 
-    suspend fun insertMhs() {
+    suspend fun insertPsrta() {
         viewModelScope.launch {
             try {
                 psrta.insertPeserta(PesertauiState.insertPesertaUiEvent.toPsrta())
