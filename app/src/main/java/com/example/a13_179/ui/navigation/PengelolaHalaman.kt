@@ -3,7 +3,6 @@ package com.example.a13_179.ui.navigation
 import com.example.a13_179.ui.view.event.DestinasiDetailEvent
 import com.example.a13_179.ui.view.event.DestinasiEntryEvent
 import com.example.a13_179.ui.view.event.DestinasiHomeEvent
-import com.example.a13_179.ui.view.event.DetaiEventlView
 import com.example.a13_179.ui.view.event.EntryEventScreen
 import com.example.a13_179.ui.view.event.HomeEventScreen
 
@@ -16,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.a13_179.ui.view.event.DestinasiUpdateEvent
+import com.example.a13_179.ui.view.event.DetailEventlView
 import com.example.a13_179.ui.view.event.UpdateEventView
 
 
@@ -53,12 +53,12 @@ fun PengelolaHalaman(
             })
         }
         composable(DestinasiDetailEvent.routesWithArg) { backStackEntry ->
-            // Mendapatkan NIM dari argument route
+
             val id = backStackEntry.arguments?.getInt(DestinasiDetailEvent.ID_EVENT)
 
             id?.let {
-                DetaiEventlView(
-                    IdEvent = it, // Mengirimkan NIM ke DetailMhsView
+                DetailEventlView(
+                    IdEvent = it, // Mengirimkan ID ke DetailMhsView
                     navigateBack = {
                         // Aksi ketika tombol "Kembali" ditekan
                         navController.navigate(DestinasiHomeEvent.route) {
@@ -86,9 +86,9 @@ fun PengelolaHalaman(
         ) { backStackEntry ->
 
             // Retrieve the 'nim' argument from the navBackStackEntry
-            val nim = backStackEntry.arguments?.getInt(DestinasiUpdateEvent.ID_EVENT)
+            val id_event = backStackEntry.arguments?.getInt(DestinasiUpdateEvent.ID_EVENT)
 
-            nim?.let {
+            id_event?.let {
                 // Pass 'nim' to the UpdateView composable
                 UpdateEventView(
                     navigateBack = {

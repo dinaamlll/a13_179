@@ -30,8 +30,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.a13_179.model.Event
 import com.example.a13_179.ui.customwidget.CostumeTopAppBar
 import com.example.a13_179.ui.navigation.DestinasiNavigasi
-import com.example.a13_179.ui.viewmodel.event.DetaiEventlUiState
 import com.example.a13_179.ui.viewmodel.event.DetailEventViewModel
+import com.example.a13_179.ui.viewmodel.event.DetailEventlUiState
 import com.example.a13_179.ui.viewmodel.event.PenyediaViewModel
 
 
@@ -44,14 +44,14 @@ object DestinasiDetailEvent : DestinasiNavigasi {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetaiEventlView(
+fun DetailEventlView(
     IdEvent: Int,
     modifier: Modifier = Modifier,
     viewModel: DetailEventViewModel = viewModel(factory = PenyediaViewModel.Factory),
     onEditClick: (Int) -> Unit = {},
     navigateBack:()->Unit,
 ) {
-    val detailEventUiState by viewModel.detaiEventlUiState.collectAsState()
+    val detailEventUiState by viewModel.detailEventlUiState.collectAsState()
     Scaffold(
         topBar = {
             CostumeTopAppBar(
@@ -63,8 +63,8 @@ fun DetaiEventlView(
             )
         },
         floatingActionButton = {
-            if (detailEventUiState is DetaiEventlUiState.Success) { // Ditambahkan
-                val event = (detailEventUiState as DetaiEventlUiState.Success).event
+            if (detailEventUiState is DetailEventlUiState.Success) { // Ditambahkan
+                val event = (detailEventUiState as DetailEventlUiState.Success).event
             FloatingActionButton(
                 onClick = { onEditClick(IdEvent) },
                 shape = MaterialTheme.shapes.medium,
@@ -78,7 +78,7 @@ fun DetaiEventlView(
             }
         }
     ) { innerPadding ->
-        val detailEventUiState by viewModel.detaiEventlUiState.collectAsState()
+        val detailEventUiState by viewModel.detailEventlUiState.collectAsState()
 
         BodyDetailMhs(
             modifier = Modifier.padding(innerPadding),
@@ -91,15 +91,15 @@ fun DetaiEventlView(
 @Composable
 fun BodyDetailMhs(
     modifier: Modifier = Modifier,
-    detailEventUiState: DetaiEventlUiState,
+    detailEventUiState: DetailEventlUiState,
     retryAction: () -> Unit = {}
 ) {
     when (detailEventUiState) {
-        is DetaiEventlUiState.Loading -> {
+        is DetailEventlUiState.Loading -> {
             // Menampilkan gambar loading saat data sedang dimuat
             OnLoading(modifier = modifier.fillMaxSize())
         }
-        is DetaiEventlUiState.Success -> {
+        is DetailEventlUiState.Success -> {
             // Menampilkan detail mahasiswa jika berhasil
             Column(
                 modifier = modifier
@@ -109,7 +109,7 @@ fun BodyDetailMhs(
                 ItemDetailEvents(event = detailEventUiState.event)
             }
         }
-        is DetaiEventlUiState.Error -> {
+        is DetailEventlUiState.Error -> {
             // Menampilkan error jika data gagal dimuat
             OnError(
                 retryAction = retryAction,

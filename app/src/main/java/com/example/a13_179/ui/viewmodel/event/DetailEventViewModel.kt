@@ -9,10 +9,10 @@ import com.example.a13_179.ui.view.event.DestinasiDetailEvent
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-sealed class DetaiEventlUiState {
-    data class Success(val event: Event) : DetaiEventlUiState()
-    object Error : DetaiEventlUiState()
-    object Loading : DetaiEventlUiState()
+sealed class DetailEventlUiState {
+    data class Success(val event: Event) : DetailEventlUiState()
+    object Error : DetailEventlUiState()
+    object Loading : DetailEventlUiState()
 }
 
 class DetailEventViewModel(
@@ -20,11 +20,12 @@ class DetailEventViewModel(
     private val evnt: EventRepository
 ) : ViewModel() {
 
-    private val _idEvent: Int = checkNotNull(savedStateHandle[DestinasiDetailEvent.ID_EVENT])
+    private val _idEvent: Int = savedStateHandle.get<String>(DestinasiDetailEvent.ID_EVENT)
+        ?.toIntOrNull()
+        ?: throw IllegalArgumentException("Invalid ID_EVENT value")
 
-    // StateFlow untuk menyimpan status UI
-    private val _detaiEventlUiState = MutableStateFlow<DetaiEventlUiState>(DetaiEventlUiState.Loading)
-    val detaiEventlUiState: StateFlow<DetaiEventlUiState> = _detaiEventlUiState
+    private val _detailEventlUiState = MutableStateFlow<DetailEventlUiState>(DetailEventlUiState.Loading)
+    val detailEventlUiState: StateFlow<DetailEventlUiState> = _detailEventlUiState
 
     init {
         getDetailEvent()
@@ -33,35 +34,26 @@ class DetailEventViewModel(
     fun getDetailEvent() {
         viewModelScope.launch {
             try {
-                // Set loading state
-                _detaiEventlUiState.value = DetaiEventlUiState.Loading
-
-                // Fetch mahasiswa data dari repository
+                _detailEventlUiState.value = DetailEventlUiState.Loading
                 val event = evnt.getEventById(_idEvent)
-
-                if (event != null) {
-                    // Jika data ditemukan, emit sukses
-                    _detaiEventlUiState.value = DetaiEventlUiState.Success(event)
+                _detailEventlUiState.value = if (event != null) {
+                    DetailEventlUiState.Success(event)
                 } else {
-                    // Jika data tidak ditemukan, emit error
-                    _detaiEventlUiState.value = DetaiEventlUiState.Error
+                    DetailEventlUiState.Error
                 }
             } catch (e: Exception) {
-                // Emit error jika terjadi exception
-                _detaiEventlUiState.value = DetaiEventlUiState.Error
+                _detailEventlUiState.value = DetailEventlUiState.Error
             }
         }
     }
 }
 
-//memindahkan data dari entity ke ui
-fun Event.toDetaiEventlUiEvent(): InsertEventUiEvent {
+fun Event.toDetailEventlUiEvent(): InsertEventUiEvent {
     return InsertEventUiEvent(
         id_event = id_event,
         nama_event = nama_event,
         deskripsi_event = deskripsi_event,
         tanggal_event = tanggal_event,
         lokasi_event = lokasi_event
-
     )
 }
