@@ -1,22 +1,32 @@
 package com.example.a13_179.ui.view.peserta
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.a13_179.R
 import com.example.a13_179.model.Peserta
 import com.example.a13_179.ui.customwidget.CostumeTopAppBar
 import com.example.a13_179.ui.navigation.DestinasiNavigasi
@@ -67,7 +77,7 @@ fun HomePesertaScreen(
             homePesertaUiState = viewModel.PesertaUIState,
             retryAction = {viewModel.getPsrta()}, modifier = Modifier.padding(innerPadding),
             onDetailClickPeserta = onDetailClickPeserta,onDeleteClickPeserta = {
-                viewModel.deletePsrta(it.nim)
+                viewModel.deletePsrta(it.id_peserta)
                 viewModel.getPsrta()
             }
         )
@@ -101,6 +111,38 @@ fun HomeStatus(
                 )
             }
         is HomePesertaUiState.Error -> OnError(retryAction, modifier = modifier.fillMaxSize())
+    }
+}
+/**
+ * OnLoading menampilkan animasi/gambar saat proses loading.
+ */
+@Composable
+fun OnLoading(modifier: Modifier = Modifier){
+    Image(
+        modifier = modifier.size(200.dp),
+        painter = painterResource(R.drawable.loading),
+        contentDescription = stringResource(R.string.loading)
+    )
+}
+
+/**
+ * OnError menampilkan pesan error dengan tombol retry untuk memuat ulang data.
+ */
+
+@Composable
+fun OnError(retryAction:()->Unit, modifier: Modifier = Modifier){
+    Column(
+        modifier=modifier,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.error), contentDescription = ""
+        )
+        Text(text = stringResource(R.string.loading_failed), modifier = Modifier.padding(16.dp))
+        Button(onClick = retryAction) {
+            Text(stringResource(R.string.retry))
+        }
     }
 }
 
