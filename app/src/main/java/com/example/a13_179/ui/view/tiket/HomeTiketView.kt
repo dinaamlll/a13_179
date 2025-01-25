@@ -65,7 +65,7 @@ fun HomeTiketScreen(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             CostumeTopAppBar(
-                title = DestinasiTiketEvent.titleRes,
+                title = DestinasiHomeTiket.titleRes,
                 canNavigateBack = false,
                 scrollBehavior = scrollBehavior,
                 onRefresh = {
