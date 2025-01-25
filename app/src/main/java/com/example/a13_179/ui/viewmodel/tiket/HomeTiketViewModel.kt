@@ -11,14 +11,14 @@ import com.example.a13_179.repository.TiketRepository
 import kotlinx.coroutines.launch
 import okio.IOException
 
-sealed class HomeUiStateTiket {
-    data class Success(val tiket: List<Tiket>) : HomeUiStateTiket()
-    object  Error : HomeUiStateTiket()
-    object Loading : HomeUiStateTiket()
+sealed class HomeTiketUiState {
+    data class Success(val tiket: List<Tiket>) : HomeTiketUiState()
+    object  Error : HomeTiketUiState()
+    object Loading : HomeTiketUiState()
 }
 
 class HomeTiketViewModel (private val tkt: TiketRepository) : ViewModel(){
-    var tktUIState: HomeUiStateTiket by mutableStateOf(HomeUiStateTiket.Loading)
+    var tktUIState: HomeTiketUiState by mutableStateOf(HomeTiketUiState.Loading)
         private set
     init {
         getTkt()
@@ -26,13 +26,13 @@ class HomeTiketViewModel (private val tkt: TiketRepository) : ViewModel(){
 
     fun getTkt(){
         viewModelScope.launch {
-            tktUIState = HomeUiStateTiket.Loading
+            tktUIState = HomeTiketUiState.Loading
             tktUIState = try {
-                HomeUiStateTiket.Success(tkt.getTiket())
+                HomeTiketUiState.Success(tkt.getTiket())
             }catch (e:IOException){
-                HomeUiStateTiket.Error
+                HomeTiketUiState.Error
             }catch (e:HttpException){
-                HomeUiStateTiket.Error
+                HomeTiketUiState.Error
             }
         }
     }
@@ -42,9 +42,9 @@ class HomeTiketViewModel (private val tkt: TiketRepository) : ViewModel(){
             try {
                 tkt.deleteTiket(id_tiket)
             }catch (e:IOException){
-                HomeUiStateTiket.Error
+                HomeTiketUiState.Error
             }catch (e:HttpException){
-                HomeUiStateTiket.Error
+                HomeTiketUiState.Error
             }
         }
     }
