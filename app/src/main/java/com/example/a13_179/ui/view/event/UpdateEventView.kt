@@ -67,7 +67,7 @@ fun UpdateEventView(
             // Pass the onDateSelected function to EntryBodyEvent
             EntryBodyEvent(
                 insertEventUiState = EventuiState,
-                onValueChange = { updatedValue ->
+                onEventValueChange = { updatedValue ->
                     viewModel.updateEventState(updatedValue) // Update ViewModel state
                 },
                 onSaveClick = {
