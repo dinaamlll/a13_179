@@ -8,6 +8,7 @@ import com.example.a13_179.model.Tiket
 import com.example.a13_179.repository.PesertaRepository
 import com.example.a13_179.repository.TiketRepository
 import com.example.a13_179.ui.view.peserta.DestinasiDetailPeserta
+import com.example.a13_179.ui.view.tiket.DestinasiDetailTiket
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -27,7 +28,7 @@ class DetailTiketViewModel(
         ?: throw IllegalArgumentException("Invalid ID_PESERTA value")
     // StateFlow untuk menyimpan status UI
     private val _detailTiketUiState = MutableStateFlow<DetailTiketUiState>(DetailTiketUiState.Loading)
-    val detailPesertaUiState: StateFlow<DetailTiketUiState> = _detailTiketUiState
+    val detailTiketUiState: StateFlow<DetailTiketUiState> = _detailTiketUiState
 
     init {
         getDetailTiket()
