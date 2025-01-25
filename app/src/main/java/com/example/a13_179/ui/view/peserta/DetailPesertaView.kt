@@ -25,9 +25,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.a13_179.model.Peserta
 import com.example.a13_179.ui.customwidget.CostumeTopAppBar
 import com.example.a13_179.ui.navigation.DestinasiNavigasi
 import com.example.a13_179.ui.viewmodel.event.PenyediaViewModel
+import com.example.a13_179.ui.viewmodel.peserta.DetailPesertaUiState
 import com.example.a13_179.ui.viewmodel.peserta.DetailPesertaViewModel
 
 
@@ -79,4 +81,85 @@ fun DetailPasienView(
         )
     }
 }
+@Composable
+fun BodyDetailPeserta(
+    modifier: Modifier = Modifier,
+    detailPesertaUiState: DetailPesertaUiState,
+    retryAction: () -> Unit = {}
+) {
+    when (detailPesertaUiState) {
+        is DetailPesertaUiState.Loading -> {
+            // Menampilkan gambar loading saat data sedang dimuat
+            OnLoading(modifier = modifier.fillMaxSize())
+        }
+        is DetailPesertaUiState.Success -> {
+            // Menampilkan detail mahasiswa jika berhasil
+            Column(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                ItemDetailPeserta(peserta = detailPesertaUiState.peserta)
+            }
+        }
+        is DetailPesertaUiState.Error -> {
+            // Menampilkan error jika data gagal dimuat
+            OnError(
+                retryAction = retryAction,
+                modifier = modifier.fillMaxSize()
+            )
+        }
+        else -> {
+            // Menangani kasus yang tidak terduga (optional, jika Anda ingin menangani hal ini)
+            // Anda bisa menambahkan logika untuk menangani kesalahan yang tidak diketahui
+            Text("Unexpected state encountered")
+        }
+    }
 
+}
+
+@Composable
+fun ItemDetailPeserta(
+    peserta: Peserta
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            ComponentDetailMhs(judul = "Id Peserta", isinya = peserta.id_peserta.toString())
+            Spacer(modifier = Modifier.padding(4.dp))
+            ComponentDetailMhs(judul = "Nama Peserta", isinya = peserta.nama_peserta)
+            Spacer(modifier = Modifier.padding(4.dp))
+            ComponentDetailMhs(judul = "Email", isinya = peserta.email)
+            Spacer(modifier = Modifier.padding(4.dp))
+            ComponentDetailMhs(judul = "Nomor Telepon", isinya = peserta.nomor_telepon)
+        }
+    }
+}
+
+@Composable
+fun ComponentDetailMhs(
+    judul: String,
+    isinya: String
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = "$judul :",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Gray
+        )
+        Text(
+            text = isinya,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
