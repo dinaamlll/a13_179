@@ -43,8 +43,9 @@ import com.example.a13_179.ui.navigation.DestinasiNavigasi
 import com.example.a13_179.ui.view.event.OnError
 import com.example.a13_179.ui.view.event.OnLoading
 import com.example.a13_179.ui.viewmodel.event.PenyediaViewModel
+import com.example.a13_179.ui.viewmodel.peserta.HomePesertaUiState
 import com.example.a13_179.ui.viewmodel.peserta.HomePesertaViewModel
-import com.example.a13_179.ui.viewmodel.peserta.HomeUiStatePeserta
+
 
 
 object DestinasiHomePeserta: DestinasiNavigasi {
@@ -96,16 +97,16 @@ fun HomePesertaScreen(
 }
 @Composable
 fun HomePesertaStatus(
-    homePesertaUiState: HomeUiStatePeserta,
+    homePesertaUiState: HomePesertaUiState,
     retryAction: () -> Unit,
     modifier: Modifier = Modifier,
     onDeleteClickPeserta: (Peserta) -> Unit,
     onDetailClickPeserta: (Int) -> Unit
 ){
     when (homePesertaUiState){
-        is HomeUiStatePeserta.Loading-> OnLoading(modifier = modifier.fillMaxSize())
+        is HomePesertaUiState.Loading-> OnLoading(modifier = modifier.fillMaxSize())
 
-        is HomeUiStatePeserta.Success ->
+        is HomePesertaUiState.Success ->
             if(homePesertaUiState.peserta.isEmpty()){
                 return Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center){
                     Text(text = "Tidak Ada Data Peserta")
@@ -121,7 +122,7 @@ fun HomePesertaStatus(
                     }
                 )
             }
-        is HomeUiStatePeserta.Error -> OnError(retryAction, modifier = modifier.fillMaxSize())
+        is HomePesertaUiState.Error -> OnError(retryAction, modifier = modifier.fillMaxSize())
     }
 }
 /**

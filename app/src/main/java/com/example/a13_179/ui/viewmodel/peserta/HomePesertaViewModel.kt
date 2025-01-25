@@ -12,14 +12,14 @@ import com.example.a13_179.repository.PesertaRepository
 import kotlinx.coroutines.launch
 import okio.IOException
 
-sealed class HomeUiStatePeserta {
-    data class Success(val peserta: List<Peserta>) : HomeUiStatePeserta()
-    object  Error : HomeUiStatePeserta()
-    object Loading : HomeUiStatePeserta()
+sealed class HomePesertaUiState {
+    data class Success(val peserta: List<Peserta>) : HomePesertaUiState()
+    object  Error : HomePesertaUiState()
+    object Loading : HomePesertaUiState()
 }
 
 class HomePesertaViewModel (private val psrta: PesertaRepository) : ViewModel(){
-    var psrtaUIState: HomeUiStatePeserta by mutableStateOf(HomeUiStatePeserta.Loading)
+    var psrtaUIState: HomePesertaUiState by mutableStateOf(HomePesertaUiState.Loading)
         private set
     init {
         getPsrta()
@@ -27,13 +27,13 @@ class HomePesertaViewModel (private val psrta: PesertaRepository) : ViewModel(){
 
     fun getPsrta(){
         viewModelScope.launch {
-            psrtaUIState = HomeUiStatePeserta.Loading
+            psrtaUIState = HomePesertaUiState.Loading
             psrtaUIState = try {
-                HomeUiStatePeserta.Success(psrta.getPeserta())
+                HomePesertaUiState.Success(psrta.getPeserta())
             }catch (e:IOException){
-                HomeUiStatePeserta.Error
+                HomePesertaUiState.Error
             }catch (e:HttpException){
-                HomeUiStatePeserta.Error
+                HomePesertaUiState.Error
             }
         }
     }
@@ -43,9 +43,9 @@ class HomePesertaViewModel (private val psrta: PesertaRepository) : ViewModel(){
             try {
                 psrta.deletePeserta(id_peserta)
             }catch (e:IOException){
-                HomeUiStatePeserta.Error
+                HomePesertaUiState.Error
             }catch (e:HttpException){
-                HomeUiStatePeserta.Error
+                HomePesertaUiState.Error
             }
         }
     }
