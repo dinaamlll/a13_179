@@ -57,7 +57,7 @@ class DetailPesertaViewModel(
 }
 
 //memindahkan data dari entity ke ui
-fun Event.toDetailPesertaUiEvent(): InsertPesertaUiEvent {
+fun Peserta.toDetailPesertaUiEvent(): InsertPesertaUiEvent {
     return InsertPesertaUiEvent(
         id_peserta = id_peserta,
         nama_peserta = nama_peserta,
