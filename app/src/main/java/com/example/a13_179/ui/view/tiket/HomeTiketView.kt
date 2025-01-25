@@ -36,13 +36,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.a13_179.model.Event
 import com.example.a13_179.ui.customwidget.CostumeTopAppBar
 import com.example.a13_179.ui.navigation.DestinasiNavigasi
-import com.example.a13_179.ui.viewmodel.event.HomeEventUiState
-import com.example.a13_179.ui.viewmodel.event.HomeEventViewModel
 import com.example.a13_179.ui.viewmodel.event.PenyediaViewModel
 import com.example.a13_179.R
+import com.example.a13_179.model.Tiket
+import com.example.a13_179.ui.viewmodel.tiket.HomeTiketUiState
 import com.example.a13_179.ui.viewmodel.tiket.HomeTiketViewModel
 
 
@@ -56,7 +55,7 @@ object DestinasiHomeTiket: DestinasiNavigasi {
 fun HomeTiketScreen(
     navigateToItemEntryTiket:()->Unit,
     modifier: Modifier=Modifier,
-    onDetailClick: (Int) -> Unit ={},
+    onDetailClickTiket: (Int) -> Unit ={},
     viewModel: HomeTiketViewModel = viewModel(factory = PenyediaViewModel.Factory)
 
 ){
@@ -82,8 +81,8 @@ fun HomeTiketScreen(
             }
         },
     ) { innerPadding->
-        HomeEventStatus(
-            homeTiketUiState = viewModel.tiketUIState,
+        HomeTiketStatus(
+            homeTiketUiState = viewModel.tktUIState,
             retryAction = {viewModel.getTkt()}, modifier = Modifier.padding(innerPadding),
             onDetailClickTiket = onDetailClickTiket,onDeleteClickTiket = {
                 viewModel.deleteTkt(it.id_tiket)
@@ -94,56 +93,50 @@ fun HomeTiketScreen(
 }
 
 @Composable
-fun HomeEventStatus(
-    homeEventUiState: HomeEventUiState,
+fun HomeTiketStatus(
+    homeTiketUiState: HomeTiketUiState,
     retryAction: () -> Unit,
     modifier: Modifier = Modifier,
-    onDeleteClick: (Event) -> Unit,
-    onDetailClick: (Int) -> Unit
+    onDeleteClickTiket: (Tiket) -> Unit,
+    onDetailClickTiket: (Int) -> Unit
 ){
-    when (homeEventUiState){
-        is HomeEventUiState.Loading-> OnLoading(modifier = modifier.fillMaxSize())
+    when (homeTiketUiState){
+        is HomeTiketUiState.Loading-> OnLoading(modifier = modifier.fillMaxSize())
 
-        is HomeEventUiState.Success ->
-            if(homeEventUiState.event.isEmpty()){
-                Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-                    Text(text = "Tidak ada data Event")
+        is HomeTiketUiState.Success ->
+            if(homeTiketUiState.tiket.isEmpty()){
+                return Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                    Text(text = "Tidak Ada Data Tiket")
                 }
             }else{
-                EventsLayout(
-                    event = homeEventUiState.event,modifier = modifier.fillMaxWidth(),
-                    onDetailClick = { onDetailClick(it.id_event) },
-                    onDeleteClick={
-                        onDeleteClick(it)
+                TiketLayout(
+                    tiket = homeTiketUiState.tiket,modifier = modifier.fillMaxWidth(),
+                    onDetailClickTiket = {
+                        onDetailClickTiket(it.id_tiket)
+                    },
+                    onDeleteClickTiket={
+                        onDeleteClickTiket(it)
                     }
                 )
             }
-        is HomeEventUiState.Error -> OnError(retryAction, modifier = modifier.fillMaxSize())
-        else -> {
-            // Default handling jika ada tipe baru
-            Box(
-                modifier = modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "Status tidak dikenal.")
-            }
-        }
+        is HomeTiketUiState.Error -> OnError(retryAction, modifier = modifier.fillMaxSize()
+        )
     }
 }
 /**
- * The home screen displaying the loading message.
+ * OnLoading menampilkan animasi/gambar saat proses loading.
  */
 @Composable
 fun OnLoading(modifier: Modifier = Modifier){
     Image(
         modifier = modifier.size(200.dp),
-        painter = painterResource(id = R.drawable.loading),
+        painter = painterResource(R.drawable.loading),
         contentDescription = stringResource(R.string.loading)
     )
 }
 
 /**
- * The home screen displaying error message with re-attempt button.
+ * OnError menampilkan pesan error dengan tombol retry untuk memuat ulang data.
  */
 
 @Composable
@@ -156,7 +149,6 @@ fun OnError(retryAction:()->Unit, modifier: Modifier = Modifier){
         Image(
             painter = painterResource(id = R.drawable.error), contentDescription = ""
         )
-
         Text(text = stringResource(R.string.loading_failed), modifier = Modifier.padding(16.dp))
         Button(onClick = retryAction) {
             Text(stringResource(R.string.retry))
@@ -165,25 +157,25 @@ fun OnError(retryAction:()->Unit, modifier: Modifier = Modifier){
 }
 
 @Composable
-fun EventsLayout(
-    event: List<Event>,
+fun TiketLayout( //TiketLayout utk menampilkan daftar tiket dengan komponen LazyColumn.
+    tiket: List<Tiket>,
     modifier: Modifier = Modifier,
-    onDetailClick:(Event)->Unit,
-    onDeleteClick: (Event) -> Unit = {}
+    onDetailClickTiket:(Tiket)->Unit,
+    onDeleteClickTiket: (Tiket) -> Unit = {}
 ){
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(event){ event ->
-            EventsCard(
-                event = event,
+        items(tiket){ tiket ->
+            TiketCard(
+                tiket = tiket,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onDetailClick(event) },
-                onDeleteClick ={
-                    onDeleteClick(event)
+                    .clickable{onDetailClickTiket(tiket)},
+                onDeleteClickTiket ={
+                    onDeleteClickTiket(tiket)
                 }
             )
 
@@ -192,10 +184,10 @@ fun EventsLayout(
 }
 
 @Composable
-fun EventsCard(
-    event: Event,
+fun TiketCard( //PesertaCard utk menampilkan detail peserta dengan opsi hapus
+    tiket: Tiket,
     modifier: Modifier = Modifier,
-    onDeleteClick:(Event)->Unit={}
+    onDeleteClickTiket:(Tiket)->Unit={}
 ){
     Card(
         modifier = modifier,
@@ -211,30 +203,26 @@ fun EventsCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = event.nama_event,
-                    style = MaterialTheme.typography.titleLarge
-                )
+                    text = tiket.id_tiket.toString(),
+                    style = MaterialTheme.typography.titleLarge)
+
                 Spacer(Modifier.weight(1f))
-                IconButton(onClick = { onDeleteClick(event) }) {
+                IconButton(onClick = { onDeleteClickTiket(tiket) }) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = null,
                     )
                 }
             }
-            // Menampilkan id_event
-            Text(
-                text = "ID: ${event.id_event}",
-                style = MaterialTheme.typography.titleMedium
+            Text(text = tiket.id_tiket.toString(),
+                style = MaterialTheme.typography.titleLarge
             )
-
-
             Text(
-                text = event.tanggal_event,
+                text = tiket.kapasitas_tiket,
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = event.lokasi_event,
+                text = tiket.harga_tiket,
                 style = MaterialTheme.typography.titleMedium
             )
         }
