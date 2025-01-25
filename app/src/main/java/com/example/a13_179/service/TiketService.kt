@@ -21,7 +21,7 @@ interface TiketService {
     @GET("tiket")
     suspend fun getAllTiket(): AllTiketResponse
 
-    @POST("ttiket/store")
+    @POST("tiket/store")
     suspend fun insertTiket(@Body ticket: Tiket)
 
     @GET("tiket/{id_tiket}")
