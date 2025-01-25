@@ -80,7 +80,7 @@ fun DetailEventlView(
     ) { innerPadding ->
         val detailEventUiState by viewModel.detailEventlUiState.collectAsState()
 
-        BodyDetailMhs(
+        BodyDetailEvent(
             modifier = Modifier.padding(innerPadding),
             detailEventUiState = detailEventUiState,
             retryAction = { viewModel.getDetailEvent() }
@@ -89,7 +89,7 @@ fun DetailEventlView(
 }
 
 @Composable
-fun BodyDetailMhs(
+fun BodyDetailEvent(
     modifier: Modifier = Modifier,
     detailEventUiState: DetailEventlUiState,
     retryAction: () -> Unit = {}
