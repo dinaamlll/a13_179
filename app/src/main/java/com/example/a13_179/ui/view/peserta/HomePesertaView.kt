@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -56,7 +57,7 @@ object DestinasiHomePeserta: DestinasiNavigasi {
 fun HomePesertaScreen(
     navigateToItemEntryPeserta:()->Unit,
     modifier: Modifier=Modifier,
-    onDetailClickPeserta: (String) -> Unit ={},
+        onDetailClickPeserta: (Int) -> Unit ={},
     viewModel: HomePesertaViewModel = viewModel(factory = PenyediaViewModel.Factory)
 
 ){
@@ -83,7 +84,7 @@ fun HomePesertaScreen(
             }
         },
     ) { innerPadding->
-        HomeStatus(
+        HomePesertaStatus(
             homePesertaUiState = viewModel.psrtaUIState,
             retryAction = {viewModel.getPsrta()}, modifier = Modifier.padding(innerPadding),
             onDetailClickPeserta = onDetailClickPeserta,onDeleteClickPeserta = {
@@ -94,12 +95,12 @@ fun HomePesertaScreen(
     }
 }
 @Composable
-fun HomeStatus(
+fun HomePesertaStatus(
     homePesertaUiState: HomeUiStatePeserta,
     retryAction: () -> Unit,
     modifier: Modifier = Modifier,
-    onDeleteClickPeserta: (Peserta) -> Unit = {},
-    onDetailClickPeserta: (String) -> Unit
+    onDeleteClickPeserta: (Peserta) -> Unit,
+    onDetailClickPeserta: (Int) -> Unit
 ){
     when (homePesertaUiState){
         is HomeUiStatePeserta.Loading-> OnLoading(modifier = modifier.fillMaxSize())
@@ -107,7 +108,7 @@ fun HomeStatus(
         is HomeUiStatePeserta.Success ->
             if(homePesertaUiState.peserta.isEmpty()){
                 return Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-                    Text(text = "Tidak ada data kontak")
+                    Text(text = "Tidak Ada Data Peserta")
                 }
             }else{
                 PesertaLayout(
@@ -161,7 +162,7 @@ fun PesertaLayout( //PesertaLayout utk menampilkan daftar peserta dengan kompone
     peserta: List<Peserta>,
     modifier: Modifier = Modifier,
     onDetailClickPeserta:(Peserta)->Unit,
-    onDetailClickPeserta: (Peserta) -> Unit = {}
+    onDeleteClickPeserta: (Peserta) -> Unit = {}
 ){
     LazyColumn(
         modifier = modifier,
@@ -174,8 +175,8 @@ fun PesertaLayout( //PesertaLayout utk menampilkan daftar peserta dengan kompone
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable{onDetailClickPeserta(peserta)},
-                onDetailClickPeserta ={
-                    onDetailClickPeserta(peserta)
+                onDeleteClickPeserta ={
+                    onDeleteClickPeserta(peserta)
                 }
             )
 
@@ -213,17 +214,12 @@ fun PesertaCard( //PesertaCard utk menampilkan detail peserta dengan opsi hapus
                         contentDescription = null,
                     )
                 }
-
+            }
+                // Menampilkan id_event
                 Text(
-                    text = peserta.id_peserta,
+                    text = "ID: ${peserta.id_peserta}",
                     style = MaterialTheme.typography.titleMedium
                 )
-            }
-
-            Text(
-                text = peserta.nama_peserta,
-                style = MaterialTheme.typography.titleMedium
-            )
             Text(
                 text = peserta.email,
                 style = MaterialTheme.typography.titleMedium
