@@ -222,12 +222,13 @@ fun EventsCard(
                         contentDescription = null,
                     )
                 }
-
+            }
+                // Menampilkan id_event
                 Text(
-                    text = event.deskripsi_event,
+                    text = "ID: ${event.id_event}",
                     style = MaterialTheme.typography.titleMedium
                 )
-            }
+
 
             Text(
                 text = event.tanggal_event,
