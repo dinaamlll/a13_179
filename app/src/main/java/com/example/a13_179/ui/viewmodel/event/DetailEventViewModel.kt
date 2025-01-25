@@ -36,7 +36,8 @@ class DetailEventViewModel(
             try {
                 _detailEventlUiState.value = DetailEventlUiState.Loading
                 val event = evnt.getEventById(_idEvent)
-                _detailEventlUiState.value = if (event != null) {
+                if (event != null) {
+                    _detailEventlUiState.value =
                     DetailEventlUiState.Success(event)
                 } else {
                     DetailEventlUiState.Error
@@ -47,6 +48,7 @@ class DetailEventViewModel(
         }
     }
 }
+
 
 fun Event.toDetailEventlUiEvent(): InsertEventUiEvent {
     return InsertEventUiEvent(
