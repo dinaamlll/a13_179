@@ -1,28 +1,29 @@
-package com.example.a13_179.ui.viewmodel.event
+package com.example.a13_179.ui.viewmodel.tiket
 
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.a13_179.EventApplications
 
 
-object PenyediaViewModel {
+
+object PenyediaViewModelTiket {
     val Factory = viewModelFactory {
-        initializer { HomeEventViewModel(AplikasiEvent().container.eventRepository) }
-        initializer { InsertEventViewModel(AplikasiEvent().container.eventRepository) }
+        initializer { HomeTiketViewModel(AplikasiEvent().container.tiketRepository) }
+
+        initializer { InsertTiketViewModel(AplikasiEvent().container.tiketRepository) }
         initializer {
-            DetailEventViewModel(
+            DetailTiketViewModel(
                 createSavedStateHandle(),
-                AplikasiEvent().container.eventRepository
+                AplikasiEvent().container.tiketRepository
             )
         }
         initializer {
-            UpdateEventViewModel(
+            UpdateTiketViewModel(
                 createSavedStateHandle(),
-                AplikasiEvent().container.eventRepository
+                AplikasiEvent().container.tiketRepository
             )
         }
     }
