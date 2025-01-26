@@ -12,13 +12,13 @@ import kotlinx.coroutines.launch
 import okio.IOException
 
 sealed class HomeTransaksiUiState {
-    data class Success(val transaksi: List<Transaksi>) : HomeTransaksUiState()
-    object  Error : HomeTransaksUiState()
-    object Loading : HomeTransaksUiState()
+    data class Success(val transaksi: List<Transaksi>) : HomeTransaksiUiState()
+    object  Error : HomeTransaksiUiState()
+    object Loading : HomeTransaksiUiState()
 }
 
-class HomeTransaksViewModel (private val trnsksi: TransaksiRepository) : ViewModel() {
-    var trnsksiUIState: HomeTransaksUiState by mutableStateOf(HomeTransaksUiState.Loading)
+class HomeTransaksiViewModel (private val trnsksi: TransaksiRepository) : ViewModel() {
+    var trnsksiUIState: HomeTransaksiUiState by mutableStateOf(HomeTransaksiUiState.Loading)
         private set
 
     init {
@@ -27,13 +27,26 @@ class HomeTransaksViewModel (private val trnsksi: TransaksiRepository) : ViewMod
 
     fun getTrnsksi() {
         viewModelScope.launch {
-            trnsksiUIState = HomeTransaksUiState.Loading
+            trnsksiUIState = HomeTransaksiUiState.Loading
             trnsksiUIState = try {
-                HomeTransaksUiState.Success(trnsksi.getTransaksi())
+                HomeTransaksiUiState.Success(trnsksi.getTransaksi())
             } catch (e: IOException) {
-                HomeTransaksUiState.Error
+                HomeTransaksiUiState.Error
             } catch (e: HttpException) {
-                HomeTransaksUiState.Error
+                HomeTransaksiUiState.Error
+            }
+        }
+    }
+
+
+    fun deleteTrnsksi(id_transaksi: Int) {
+        viewModelScope.launch {
+            try {
+                trnsksi.deleteTransaksi(id_transaksi)
+            } catch (e: IOException) {
+                HomeTransaksiUiState.Error
+            } catch (e: HttpException) {
+                HomeTransaksiUiState.Error
             }
         }
     }
