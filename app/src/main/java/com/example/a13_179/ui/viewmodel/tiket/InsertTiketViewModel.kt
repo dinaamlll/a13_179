@@ -9,42 +9,59 @@ import com.example.a13_179.model.Tiket
 import com.example.a13_179.repository.TiketRepository
 import kotlinx.coroutines.launch
 
-class InsertTiketViewModel(private val tkt: TiketRepository) : ViewModel() {
-    var TiketuiState by mutableStateOf(InsertTiketUiState())
+class InsertTiketViewModel(private val tiket: TiketRepository) : ViewModel() {
+
+    var uiState by mutableStateOf(InsertTiketUiState())
+        private set
 
     fun updateInsertTktState(insertTiketUiEvent: InsertTiketUiEvent) {
-        TiketuiState = InsertTiketUiState(insertTiketUiEvent =insertTiketUiEvent)
+        uiState = InsertTiketUiState(insertTiketUiEvent = insertTiketUiEvent)
     }
 
-    suspend fun insertTkt() {
+    fun insertTiket() {
         viewModelScope.launch {
             try {
-                tkt.insertTiket(TiketuiState.insertTiketUiEvent.toTkt())
-            }catch (e:Exception){
+                tiket.insertTiket(uiState.insertTiketUiEvent.toTkt())
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
 }
 
+// Data class untuk InsertTiketUiState
 data class InsertTiketUiState(
     val insertTiketUiEvent: InsertTiketUiEvent = InsertTiketUiEvent()
 )
 
+// Data class untuk InsertTiketUiEvent
 data class InsertTiketUiEvent(
-    val id_tiket: Int? = null,  //  Int? untuk memungkinkan nilai null
-    val kapasitas_tiket:String = "",
-    val harga_tiket:String = "",
-    val nomor_telepon:String = "",
+    val id_tiket: Int = 0, // Ganti menjadi Int
+    val id_event: Int = 0, // Ganti menjadi Int
+    val id_peserta: Int = 0, // Ganti menjadi Int
+    val kapasitas_tiket: Int = 0, // Nilai default untuk kapasitas_tiket
+    val harga_tiket: Int = 0 // Nilai default untuk harga_tiket
 )
+
+// Mengubah InsertTiketUiEvent menjadi Tiket
 fun InsertTiketUiEvent.toTkt(): Tiket = Tiket(
-    id_tiket = id_tiket ?: 0,
+    id_tiket = id_tiket,
+    id_event = id_event,
+    id_peserta = id_peserta,
     kapasitas_tiket = kapasitas_tiket,
     harga_tiket = harga_tiket
 )
 
-fun Tiket.toInsertTiketUiEvent():InsertTiketUiEvent = InsertTiketUiEvent(
-    id_tiket= id_tiket,
+// Mengubah Tiket menjadi InsertTiketUiState
+fun Tiket.toTiketUiState(): InsertTiketUiState = InsertTiketUiState(
+    insertTiketUiEvent = toInsertTiketUiEvent()
+)
+
+// Mengubah Tiket menjadi InsertTiketUiEvent
+fun Tiket.toInsertTiketUiEvent(): InsertTiketUiEvent = InsertTiketUiEvent(
+    id_tiket = id_tiket,
+    id_event = id_event,
+    id_peserta = id_peserta,
     kapasitas_tiket = kapasitas_tiket,
-    harga_tiket = harga_tiket,
+    harga_tiket = harga_tiket
 )
