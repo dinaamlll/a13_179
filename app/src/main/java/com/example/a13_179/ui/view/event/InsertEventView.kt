@@ -67,6 +67,15 @@ fun EntryEventScreen(
                 scrollBehavior = scrollBehavior, //supaya tampilan app bar bisa berubah pas di-scroll, misalnya jadi kecil atau tetap di tempat.
                 onBackClick = navigateBack //buat balik ke halaman sebelumnya.
             )
+        },
+        bottomBar = { //utk berpindah antar fitur utama aplikasi
+            BottomAppBarDefaults(
+                navController = rememberNavController(),
+                onEventClick = onEventClick,
+                onPesertaClick = onPesertaClick,
+                onTiketClick = onTiketClick,
+                onTransaksiClick = onTransaksiClick
+            )
         }
     ){ innerPadding ->
         EntryBodyEvent(
