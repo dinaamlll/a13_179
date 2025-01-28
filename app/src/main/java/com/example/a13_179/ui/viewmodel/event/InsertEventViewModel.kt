@@ -17,7 +17,7 @@ class InsertEventViewModel(private val eventRepository: EventRepository) : ViewM
         uiState = InsertEventUiState(insertEventUiEvent = insertEventUiEvent)
     }
 
-   suspend fun insertEvent() {
+    suspend fun insertEvent() {
         viewModelScope.launch {
             try {
                 eventRepository.insertEvent(uiState.insertEventUiEvent.toEvent())

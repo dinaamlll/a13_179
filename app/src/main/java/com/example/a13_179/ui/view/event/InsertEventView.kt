@@ -52,9 +52,6 @@ fun EntryEventScreen(
     modifier: Modifier = Modifier,
     viewModel: InsertEventViewModel = viewModel(factory = PenyediaViewModelEvent.Factory)
 ) {
-    val selectedDate = remember { mutableStateOf("") }
-    val datePickerState = rememberDatePickerState()
-    var isDatePickerVisible by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -131,7 +128,8 @@ fun FormInput(
     enabled: Boolean = true,
 
 ) {
-
+    var datePickerVisible by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf(insertEventUiEvent.tanggal_event) }
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp)
