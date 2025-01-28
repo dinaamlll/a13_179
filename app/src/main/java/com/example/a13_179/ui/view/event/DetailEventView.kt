@@ -131,47 +131,39 @@ fun DetailEventScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ){
-                    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-        )
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            ComponentDetailEvents(judul = "Id Event", isinya = event.id_event.toString())
-            Spacer(modifier = Modifier.padding(4.dp))
-            ComponentDetailEvents(judul = "Nama Event", isinya = event.nama_event)
-            Spacer(modifier = Modifier.padding(4.dp))
-            ComponentDetailEvents(judul = "Deskripsi Event", isinya = event.deskripsi_event)
-            Spacer(modifier = Modifier.padding(4.dp))
-            ComponentDetailEvents(judul = "Tanggal Event", isinya = event.tanggal_event)
-            Spacer(modifier = Modifier.padding(4.dp))
-            ComponentDetailEvents(judul = "Lokasi Event", isinya = event.lokasi_event)
-
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            elevation = CardDefaults.cardElevation(8.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = "Id Event: ${event.id_event}",
+                                    style = MaterialTheme.typography.bodyLarge)
+                                Text(
+                                    text = "Nama Event: ${event.nama_event}"
+                                    , style = MaterialTheme.typography.bodyLarge)
+                                Text(text = "Deskripsi Event: ${event.deskripsi_event}"
+                                    , style = MaterialTheme.typography.bodyLarge)
+                                Text(text = "Tanggal Event: ${event.tanggal_event}"
+                                    , style = MaterialTheme.typography.bodyLarge)
+                                Text(text = "Lokasi Event: ${event.lokasi_event}"
+                                    , style = MaterialTheme.typography.bodyLarge)
+                            }
+                        }
+                        Row (
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ){
+                            Button(onClick = {onEditClick(event.id_event)}) {
+                                Text("Edit Data")
+                            }
+                        }
+                    }
+                }
+            }
         }
-    }
-}
-
-@Composable
-fun ComponentDetailEvents(
-    judul: String,
-    isinya: String
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.Start
-    ) {
-        Text(
-            text = "$judul :",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Gray
-        )
-        Text(
-            text = isinya,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
+    )
 }
