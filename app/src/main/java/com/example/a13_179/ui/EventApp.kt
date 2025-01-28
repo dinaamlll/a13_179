@@ -27,7 +27,7 @@ fun EventApp(
                 .fillMaxSize()
                 .padding(it)
         ){
-            PengelolaHalaman()
+            PengelolaHalaman(modifier = Modifier)
         }
     }
 }
