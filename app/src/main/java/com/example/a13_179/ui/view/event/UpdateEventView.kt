@@ -12,39 +12,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
+import com.example.a13_179.ui.customwidget.BottomAppBarDefaults
 import com.example.a13_179.ui.customwidget.CostumeTopAppBar
 import com.example.a13_179.ui.navigation.DestinasiNavigasi
+import com.example.a13_179.ui.view.peserta.EntryBodyPeserta
 import com.example.a13_179.ui.viewmodel.event.InsertEventUiEvent
-import com.example.a13_179.ui.viewmodel.event.PenyediaViewModel
+import com.example.a13_179.ui.viewmodel.event.PenyediaViewModelEvent
 import com.example.a13_179.ui.viewmodel.event.UpdateEventViewModel
 import com.example.a13_179.ui.viewmodel.event.toEvent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 object DestinasiUpdateEvent : DestinasiNavigasi {
     override val route = "update_event"
-    const val ID_EVENT = "id_event"
-    val routesWithArg = "$route/{$ID_EVENT}"
+    const val id_event = "id_event"
+    val routeWithArgs = "$route/{$id_event}"
     override val titleRes = "Update Event"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UpdateEventView(
-    navigateBack: () -> Unit,
+fun UpdateEventScreen(
     modifier: Modifier = Modifier,
-    viewModel: UpdateEventViewModel = viewModel(factory = PenyediaViewModel.Factory)
+    onBackClick: () -> Unit,
+    onNavigate:()-> Unit,
+    onEventClick: () -> Unit,
+    onPesertaClick: () -> Unit,
+    onTiketClick: () -> Unit,
+    onTransaksiClick: () -> Unit,
+    viewModel: UpdateEventViewModel = viewModel(factory = PenyediaViewModelEvent.Factory)
 ) {
     val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
-    // Collect the UI state from the ViewModel
-    val EventuiState = viewModel.EventuiState.value
-
-    // Define the onDateSelected function to handle date selection
-    val onDateSelected: (String) -> Unit = { selectedDate ->
-        // Update the ViewModel state with the selected date
-        viewModel.updateEventState(InsertEventUiEvent(tanggal_event = selectedDate))
-    }
 
 
     Scaffold(
