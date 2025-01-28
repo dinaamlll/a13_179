@@ -1,4 +1,4 @@
-package com.example.a13_179.ui.view.event
+package com.example.a13_179.ui.viewmodel.event
 
 import com.example.a13_179.ui.viewmodel.tiket.DetailTiketViewModel
 import com.example.a13_179.ui.viewmodel.tiket.HomeTiketViewModel
@@ -23,7 +23,6 @@ object PenyediaViewModelEvent {
         initializer { InsertEventViewModel(AplikasiEvent().container.eventRepository) }
         initializer {
             DetailEventViewModel(
-                createSavedStateHandle(),
                 AplikasiEvent().container.eventRepository
             )
         }

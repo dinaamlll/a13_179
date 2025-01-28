@@ -23,7 +23,6 @@ object PenyediaViewModelPeserta {
         initializer { InsertPesertaViewModel(AplikasiEvent().container.pesertaRepository) }
         initializer {
             DetailPesertaViewModel(
-                createSavedStateHandle(),
                 AplikasiEvent().container.pesertaRepository
             )
         }
