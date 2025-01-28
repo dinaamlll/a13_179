@@ -36,33 +36,44 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import com.example.a13_179.R
 import com.example.a13_179.model.Peserta
+import com.example.a13_179.ui.customwidget.BottomAppBarDefaults
 import com.example.a13_179.ui.customwidget.CostumeTopAppBar
 import com.example.a13_179.ui.navigation.DestinasiNavigasi
-import com.example.a13_179.ui.view.event.OnError
-import com.example.a13_179.ui.view.event.OnLoading
-import com.example.a13_179.ui.viewmodel.event.PenyediaViewModel
+import com.example.a13_179.ui.view.tiket.DestinasiUpdateTiket
+import com.example.a13_179.ui.view.tiket.OnError
+import com.example.a13_179.ui.view.tiket.OnLoading
+import com.example.a13_179.ui.viewmodel.event.PenyediaViewModelEvent
 import com.example.a13_179.ui.viewmodel.peserta.HomePesertaUiState
 import com.example.a13_179.ui.viewmodel.peserta.HomePesertaViewModel
+import com.example.a13_179.ui.viewmodel.peserta.PenyediaViewModelPeserta
 
-
-
-object DestinasiHomePeserta: DestinasiNavigasi {
-    override val route ="home_peserta"
+object DestinasiHomePeserta : DestinasiNavigasi {
+    override val route = "home_peserta"
     override val titleRes = "Home Peserta"
+    const val id_transaksi = "id_transaksi"
+    val routesWithArg = "$route/{$id_transaksi}"
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomePesertaScreen(
-    navigateToItemEntryPeserta:()->Unit,
-    modifier: Modifier=Modifier,
-        onDetailClickPeserta: (Int) -> Unit ={},
-    viewModel: HomePesertaViewModel = viewModel(factory = PenyediaViewModel.Factory)
+    navigateToItemEntry: () -> Unit,
+    modifier: Modifier = Modifier,
+    onDetailClick: (Int) -> Unit = {},
+    onEventClick: () -> Unit,
+    onPesertaClick: () -> Unit,
+    onTiketClick: () -> Unit,
+    onTransaksiClick: () -> Unit,
+    viewModel: HomePesertaViewModel = viewModel(factory = PenyediaViewModelPeserta.Factory)
+) {
 
-){
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
+
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -70,127 +81,115 @@ fun HomePesertaScreen(
                 title = DestinasiHomePeserta.titleRes,
                 canNavigateBack = false,
                 scrollBehavior = scrollBehavior,
+                modifier = modifier,
                 onRefresh = {
-                    viewModel.getPsrta()
-                }
+                    viewModel.getPsrta() }
+
             )
         },
-        floatingActionButton = { //`FloatingActionButton` untuk navigasi ke entri peserta.
+        bottomBar = {
+            BottomAppBarDefaults(
+                navController = rememberNavController(),
+                onEventClick = onEventClick,
+                onPesertaClick = onPesertaClick,
+                onTiketClick = onTiketClick,
+                onTransaksiClick = onTransaksiClick
+            )
+        },
+        floatingActionButton = {
             FloatingActionButton(
-                onClick = navigateToItemEntryPeserta,
+                onClick = navigateToItemEntry,
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.padding(18.dp)
             ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Peserta")
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add Peserta"
+                )
             }
-        },
-    ) { innerPadding->
-        HomePesertaStatus(
+        }
+    ) { innerPadding ->
+        HomeStatus(
             homePesertaUiState = viewModel.psrtaUIState,
-            retryAction = {viewModel.getPsrta()}, modifier = Modifier.padding(innerPadding),
-            onDetailClickPeserta = onDetailClickPeserta,onDeleteClickPeserta = {
+            retryAction = { viewModel.getPsrta() },
+            modifier = Modifier.padding(innerPadding),
+            onDetailClick = onDetailClick,
+            onDeleteClick = {
                 viewModel.deletePsrta(it.id_peserta)
                 viewModel.getPsrta()
             }
         )
     }
 }
+
 @Composable
-fun HomePesertaStatus(
+fun HomeStatus(
+    onDeleteClick: (Peserta) -> Unit,
+    onDetailClick: (Int) -> Unit,
     homePesertaUiState: HomePesertaUiState,
     retryAction: () -> Unit,
-    modifier: Modifier = Modifier,
-    onDeleteClickPeserta: (Peserta) -> Unit,
-    onDetailClickPeserta: (Int) -> Unit
-){
-    when (homePesertaUiState){
-        is HomePesertaUiState.Loading-> OnLoading(modifier = modifier.fillMaxSize())
+    modifier: Modifier = Modifier
 
+) {
+
+    when (homePesertaUiState) {
+        is HomePesertaUiState.Loading -> OnLoading(modifier = modifier.fillMaxSize())
         is HomePesertaUiState.Success ->
-            if(homePesertaUiState.peserta.isEmpty()){
-                return Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+            if (homePesertaUiState.peserta.isEmpty()) {
+                Box(
+                    modifier = modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(text = "Tidak Ada Data Peserta")
                 }
-            }else{
+            } else {
                 PesertaLayout(
-                    peserta = homePesertaUiState.peserta,modifier = modifier.fillMaxWidth(),
-                    onDetailClickPeserta = {
-                        onDetailClickPeserta(it.id_peserta)
+                    peserta = homePesertaUiState.peserta,
+                    modifier = modifier.fillMaxWidth(),
+                    onDetailClick = {
+                        onDetailClick(it.id_peserta)
                     },
-                    onDeleteClickPeserta={
-                        onDeleteClickPeserta(it)
+                    onDeleteClick = {
+                        onDeleteClick(it)
                     }
                 )
             }
         is HomePesertaUiState.Error -> OnError(retryAction, modifier = modifier.fillMaxSize())
     }
 }
-/**
- * OnLoading menampilkan animasi/gambar saat proses loading.
- */
-@Composable
-fun OnLoading(modifier: Modifier = Modifier){
-    Image(
-        modifier = modifier.size(200.dp),
-        painter = painterResource(R.drawable.loading),
-        contentDescription = stringResource(R.string.loading)
-    )
-}
-
-/**
- * OnError menampilkan pesan error dengan tombol retry untuk memuat ulang data.
- */
 
 @Composable
-fun OnError(retryAction:()->Unit, modifier: Modifier = Modifier){
-    Column(
-        modifier=modifier,
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.error), contentDescription = ""
-        )
-        Text(text = stringResource(R.string.loading_failed), modifier = Modifier.padding(16.dp))
-        Button(onClick = retryAction) {
-            Text(stringResource(R.string.retry))
-        }
-    }
-}
-
-@Composable
-fun PesertaLayout( //PesertaLayout utk menampilkan daftar peserta dengan komponen LazyColumn.
+fun PesertaLayout(
     peserta: List<Peserta>,
     modifier: Modifier = Modifier,
-    onDetailClickPeserta:(Peserta)->Unit,
-    onDeleteClickPeserta: (Peserta) -> Unit = {}
-){
+    onDetailClick: (Peserta) -> Unit,
+    onDeleteClick: (Peserta) -> Unit = {}
+) {
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(peserta){ peserta ->
+        items(peserta) { peserta ->
             PesertaCard(
                 peserta = peserta,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable{onDetailClickPeserta(peserta)},
-                onDeleteClickPeserta ={
-                    onDeleteClickPeserta(peserta)
+                    .clickable { onDetailClick(peserta) },
+                onDeleteClick = {
+                    onDeleteClick(peserta)
                 }
             )
-
         }
     }
 }
 
 @Composable
-fun PesertaCard( //PesertaCard utk menampilkan detail peserta dengan opsi hapus
+fun PesertaCard(
     peserta: Peserta,
     modifier: Modifier = Modifier,
-    onDeleteClickPeserta:(Peserta)->Unit={}
-){
+    onDeleteClick: (Peserta) -> Unit = {}
+) {
     Card(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
@@ -205,22 +204,21 @@ fun PesertaCard( //PesertaCard utk menampilkan detail peserta dengan opsi hapus
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = peserta.nama_peserta,
+                    text = peserta.id_peserta.toString(),
                     style = MaterialTheme.typography.titleLarge
                 )
                 Spacer(Modifier.weight(1f))
-                IconButton(onClick = { onDeleteClickPeserta(peserta) }) {
+                IconButton(onClick = { onDeleteClick(peserta) }) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = null,
+                        contentDescription = null
                     )
                 }
-            }
-                // Menampilkan id_event
                 Text(
-                    text = "ID: ${peserta.id_peserta}",
+                    text = peserta.nama_peserta,
                     style = MaterialTheme.typography.titleMedium
                 )
+            }
             Text(
                 text = peserta.email,
                 style = MaterialTheme.typography.titleMedium

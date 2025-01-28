@@ -36,10 +36,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import com.example.a13_179.ui.customwidget.CostumeTopAppBar
 import com.example.a13_179.ui.navigation.DestinasiNavigasi
 import com.example.a13_179.R
 import com.example.a13_179.model.Transaksi
+import com.example.a13_179.ui.customwidget.BottomAppBarDefaults
 import com.example.a13_179.ui.viewmodel.tiket.PenyediaViewModelTransaksi
 import com.example.a13_179.ui.viewmodel.transaksi.HomeTransaksiUiState
 import com.example.a13_179.ui.viewmodel.transaksi.HomeTransaksiViewModel
@@ -53,13 +55,11 @@ object DestinasiHomeTransaksi: DestinasiNavigasi {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTransaksiScreen(
-    onHomeClick: () -> Unit,
     onEventClick: () -> Unit,
     onPesertaClick: () -> Unit,
     onTiketClick: () -> Unit,
     onTransaksiClick: () -> Unit,
     navigateToItemEntry:()->Unit,
-    navigateBack: () -> Unit,
     modifier: Modifier = Modifier,
     onDetailClick: (Int) -> Unit ={},
     viewModel: HomeTransaksiViewModel = viewModel(factory = PenyediaViewModelTransaksi.Factory)
@@ -71,11 +71,19 @@ fun HomeTransaksiScreen(
         topBar = {
             CostumeTopAppBar(
                 title = DestinasiHomeTransaksi.titleRes,
-                navigateUp = navigateBack,
                 canNavigateBack = true,
                 scrollBehavior = scrollBehavior,
                 onRefresh = {
                     viewModel.getTrnsksi ()}
+            )
+        },
+        bottomBar = {
+            BottomAppBarDefaults(
+                navController = rememberNavController(),
+                onEventClick = onEventClick,
+                onPesertaClick = onPesertaClick,
+                onTiketClick = onTiketClick,
+                onTransaksiClick = onTransaksiClick
             )
         },
         floatingActionButton = {
@@ -169,19 +177,19 @@ fun TransaksiLayout(
     modifier: Modifier = Modifier,
     onDetailClick:(Transaksi)->Unit,
     onDeleteClickTransaksi: (Transaksi) -> Unit = {}
-){
+) {
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(transaksi){ transaksi ->
+        items(transaksi) { transaksi ->
             TransaksiCard(
                 transaksi = transaksi,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable{onDetailClick(transaksi)},
-                onDeleteClickTransaksi ={
+                    .clickable { onDetailClick(transaksi) },
+                onDeleteClickTransaksi = {
                     onDeleteClickTransaksi(transaksi)
                 }
             )
@@ -205,14 +213,6 @@ fun TransaksiCard( //PesertaCard utk menampilkan detail peserta dengan opsi hapu
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = transaksi.id_transaksi.toString(),
-                    style = MaterialTheme.typography.titleLarge)
-
                 Spacer(Modifier.weight(1f))
                 IconButton(onClick = { onDeleteClickTransaksi(transaksi) }) {
                     Icon(
@@ -221,12 +221,8 @@ fun TransaksiCard( //PesertaCard utk menampilkan detail peserta dengan opsi hapu
                     )
                 }
             }
-            Text(text = transaksi.id_tiket.toString(), style = MaterialTheme.typography.titleLarge)
-            Text(text = transaksi.nama_event, style = MaterialTheme.typography.titleMedium)
-            Text(text = transaksi.nama_peserta, style = MaterialTheme.typography.titleMedium)
-            Text(text = transaksi.tanggal_transaksi, style = MaterialTheme.typography.titleMedium)
-            Text(text = "Jumlah Tiket: ${transaksi.jumlah_tiket}", style = MaterialTheme.typography.bodyMedium)
+            Text(text = transaksi.id_tiket.toString(), style = MaterialTheme.typography.bodyMedium)
+            Text(text = transaksi.tanggal_transaksi, style = MaterialTheme.typography.bodyMedium)
             Text(text = "Jumlah Pembayaran: Rp. ${transaksi.jumlah_pembayaran}", style = MaterialTheme.typography.bodyMedium)
         }
     }
-}

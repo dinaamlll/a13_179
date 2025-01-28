@@ -29,6 +29,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -36,13 +40,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.a13_179.ui.customwidget.CostumeTopAppBar
 import com.example.a13_179.ui.navigation.DestinasiNavigasi
-import com.example.a13_179.ui.viewmodel.event.PenyediaViewModel
 import com.example.a13_179.R
 import com.example.a13_179.model.Tiket
+import com.example.a13_179.ui.customwidget.BottomAppBarDefaults
+import com.example.a13_179.ui.view.event.DestinasiHomeEvent
 import com.example.a13_179.ui.viewmodel.tiket.HomeTiketUiState
 import com.example.a13_179.ui.viewmodel.tiket.HomeTiketViewModel
+import com.example.a13_179.ui.viewmodel.tiket.PenyediaViewModelTiket
 
 
 object DestinasiHomeTiket: DestinasiNavigasi {
@@ -53,27 +62,41 @@ object DestinasiHomeTiket: DestinasiNavigasi {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTiketScreen(
-    navigateToItemEntryTiket:()->Unit,
+    onDetailClick: (Int) -> Unit = {},
+    onEventClick: () -> Unit,
+    onPesertaClick: () -> Unit,
+    onTiketClick: () -> Unit,
+    onTransaksiClick: () -> Unit,
+    navigateToItemEntry: () -> Unit,
     modifier: Modifier=Modifier,
-    onDetailClickTiket: (Int) -> Unit ={},
-    viewModel: HomeTiketViewModel = viewModel(factory = PenyediaViewModel.Factory)
+    viewModel: HomeTiketViewModel = viewModel(factory = PenyediaViewModelTiket.Factory),
 
-){
+    ){
+
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             CostumeTopAppBar(
                 title = DestinasiHomeTiket.titleRes,
-                canNavigateBack = false,
+                canNavigateBack = true,
                 scrollBehavior = scrollBehavior,
                 onRefresh = {
                     viewModel.getTkt ()}
             )
         },
+        bottomBar = {
+            BottomAppBarDefaults(
+                navController = rememberNavController(),
+                onEventClick = onEventClick,
+                onPesertaClick = onPesertaClick,
+                onTiketClick = onTiketClick,
+                onTransaksiClick = onTransaksiClick
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = navigateToItemEntryTiket,
+                onClick = navigateToItemEntry,
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.padding(18.dp)
             ) {
@@ -84,7 +107,7 @@ fun HomeTiketScreen(
         HomeTiketStatus(
             homeTiketUiState = viewModel.tktUIState,
             retryAction = {viewModel.getTkt()}, modifier = Modifier.padding(innerPadding),
-            onDetailClickTiket = onDetailClickTiket,onDeleteClickTiket = {
+            onDetailClick = onDetailClick,onDeleteClickTiket = {
                 viewModel.deleteTkt(it.id_tiket)
                 viewModel.getTkt()
             }
@@ -98,7 +121,7 @@ fun HomeTiketStatus(
     retryAction: () -> Unit,
     modifier: Modifier = Modifier,
     onDeleteClickTiket: (Tiket) -> Unit,
-    onDetailClickTiket: (Int) -> Unit
+    onDetailClick: (Int) -> Unit
 ){
     when (homeTiketUiState){
         is HomeTiketUiState.Loading-> OnLoading(modifier = modifier.fillMaxSize())
@@ -111,8 +134,8 @@ fun HomeTiketStatus(
             }else{
                 TiketLayout(
                     tiket = homeTiketUiState.tiket,modifier = modifier.fillMaxWidth(),
-                    onDetailClickTiket = {
-                        onDetailClickTiket(it.id_tiket)
+                    onDetailClick = {
+                        onDetailClick(it.id_tiket)
                     },
                     onDeleteClickTiket={
                         onDeleteClickTiket(it)
@@ -160,7 +183,7 @@ fun OnError(retryAction:()->Unit, modifier: Modifier = Modifier){
 fun TiketLayout( //TiketLayout utk menampilkan daftar tiket dengan komponen LazyColumn.
     tiket: List<Tiket>,
     modifier: Modifier = Modifier,
-    onDetailClickTiket:(Tiket)->Unit,
+    onDetailClick:(Tiket)->Unit,
     onDeleteClickTiket: (Tiket) -> Unit = {}
 ){
     LazyColumn(
@@ -173,8 +196,8 @@ fun TiketLayout( //TiketLayout utk menampilkan daftar tiket dengan komponen Lazy
                 tiket = tiket,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable{onDetailClickTiket(tiket)},
-                onDeleteClickTiket ={
+                    .clickable{onDetailClick(tiket)},
+                onDeleteClickTiket={
                     onDeleteClickTiket(tiket)
                 }
             )
@@ -184,7 +207,7 @@ fun TiketLayout( //TiketLayout utk menampilkan daftar tiket dengan komponen Lazy
 }
 
 @Composable
-fun TiketCard( //PesertaCard utk menampilkan detail peserta dengan opsi hapus
+fun TiketCard( //TiketCard utk menampilkan detail tiket dengan opsi hapus
     tiket: Tiket,
     modifier: Modifier = Modifier,
     onDeleteClickTiket:(Tiket)->Unit={}
@@ -218,11 +241,11 @@ fun TiketCard( //PesertaCard utk menampilkan detail peserta dengan opsi hapus
                 style = MaterialTheme.typography.titleLarge
             )
             Text(
-                text = tiket.kapasitas_tiket,
+                text = tiket.kapasitas_tiket.toString(),
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = tiket.harga_tiket,
+                text = tiket.harga_tiket.toString(),
                 style = MaterialTheme.typography.titleMedium
             )
         }

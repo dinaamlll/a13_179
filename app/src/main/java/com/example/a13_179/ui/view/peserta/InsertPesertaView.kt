@@ -22,14 +22,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.a13_179.ui.customwidget.CostumeTopAppBar
 import com.example.a13_179.ui.navigation.DestinasiNavigasi
-import com.example.a13_179.ui.viewmodel.event.PenyediaViewModel
 import com.example.a13_179.ui.viewmodel.peserta.InsertPesertaUiEvent
 import com.example.a13_179.ui.viewmodel.peserta.InsertPesertaUiState
 import com.example.a13_179.ui.viewmodel.peserta.InsertPesertaViewModel
+import com.example.a13_179.ui.viewmodel.peserta.PenyediaViewModelPeserta
 import kotlinx.coroutines.launch
 
 object DestinasiEntryPeserta: DestinasiNavigasi {
-    override val route = "item_entry_peserta"
+    override val route = "entry_peserta"
     override val titleRes = "Entry Peserta"
 
 }
@@ -37,9 +37,13 @@ object DestinasiEntryPeserta: DestinasiNavigasi {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EntryPesertaScreen(
-    navigateBack:()->Unit,
+    navigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: InsertPesertaViewModel = viewModel(factory = PenyediaViewModel.Factory)
+    onEventClick: () -> Unit,
+    onPesertaClick: () -> Unit,
+    onTiketClick: () -> Unit,
+    onTransaksiClick: () -> Unit,
+    viewModel: InsertPesertaViewModel = viewModel(factory = PenyediaViewModelPeserta.Factory)
 ){
     val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -50,16 +54,16 @@ fun EntryPesertaScreen(
                 title = DestinasiEntryPeserta.titleRes,
                 canNavigateBack = true,
                 scrollBehavior = scrollBehavior,
-                navigateUp = navigateBack
+                onBackClick = navigateBack
             )
         }
     ) { innerPadding ->
         EntryBodyPeserta( //EntryBody untuk form input data peserta dengan tombol simpan.
-            insertPesertaUiState = viewModel.PesertauiState,
-            onPesertaValueChange = viewModel::updateInsertPsrtaState,
+            insertPesertaUiState = viewModel.uiState,
+            onPesertaValueChange = viewModel::updateInsertPesertaState,
             onSaveClick = {
                 coroutineScope.launch {
-                    viewModel.insertPsrta()
+                    viewModel.insertPeserta()
                     navigateBack()
                 }
             },
@@ -109,6 +113,19 @@ fun FormInputPeserta(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         OutlinedTextField(
+            value = insertPesertaUiEvent.id_peserta.toString(),  // Convert Int to String for display
+            onValueChange = { newText ->
+                // Convert the new text back to Int (if possible) and update the state
+                val newIdPeserta = newText.toIntOrNull() ?: 0  // Default to 0 if conversion fails
+                onValueChange(insertPesertaUiEvent.copy(id_peserta = newIdPeserta))
+            },
+            label = { Text("Id Peserta") },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            singleLine = true
+        )
+    }
+        OutlinedTextField(
             value = insertPesertaUiEvent.nama_peserta,
             onValueChange = { onValueChange(insertPesertaUiEvent.copy(nama_peserta = it)) },
             label = { Text("Nama") },
@@ -117,16 +134,7 @@ fun FormInputPeserta(
             singleLine = true
         )
 
-        OutlinedTextField(
-            value = insertPesertaUiEvent.id_peserta?.toString() ?: "",
-            onValueChange = {
-                onValueChange(insertPesertaUiEvent.copy(id_peserta = it.toIntOrNull()))
-            },
-            label = { Text("Id Peserta") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = enabled,
-            singleLine = true
-        )
+
 
         OutlinedTextField(
             value = insertPesertaUiEvent.email,
@@ -158,4 +166,3 @@ fun FormInputPeserta(
             modifier = Modifier.padding(12.dp)
         )
     }
-}

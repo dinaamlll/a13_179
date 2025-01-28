@@ -12,68 +12,77 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
+import com.example.a13_179.ui.customwidget.BottomAppBarDefaults
 import com.example.a13_179.ui.customwidget.CostumeTopAppBar
 import com.example.a13_179.ui.navigation.DestinasiNavigasi
-import com.example.a13_179.ui.viewmodel.event.PenyediaViewModel
+import com.example.a13_179.ui.viewmodel.peserta.PenyediaViewModelPeserta
 import com.example.a13_179.ui.viewmodel.peserta.UpdatePesertaViewModel
 import com.example.a13_179.ui.viewmodel.peserta.toPsrta
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
 
 object DestinasiUpdatePeserta : DestinasiNavigasi {
     override val route = "update_peserta"
-    const val ID_PESERTA = "id_peserta"
-    val routesWithArg = "$route/{$ID_PESERTA}"
+    const val id_peserta = "id_peserta"
+    val routeWithArgs = "$route/{$id_peserta}"
     override val titleRes = "Update Peserta"
 }
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UpdatePesertaView(
-    navigateBack: () -> Unit,
+fun UpdatePesertaScreen(
+    onBack: () -> Unit,
+    onNavigate:()-> Unit,
+    onEventClick: () -> Unit,
+    onPesertaClick: () -> Unit,
+    onTiketClick: () -> Unit,
+    onTransaksiClick: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: UpdatePesertaViewModel = viewModel(factory = PenyediaViewModel.Factory)
-) {
+    viewModel: UpdatePesertaViewModel = viewModel(factory = PenyediaViewModelPeserta.Factory)
+){
+
     val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-    // Collect the UI state from the ViewModel
-    val PesertauiState = viewModel.PesertauiState.value
-
-    Scaffold(
+    Scaffold (
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             CostumeTopAppBar(
                 title = DestinasiUpdatePeserta.titleRes,
                 canNavigateBack = true,
                 scrollBehavior = scrollBehavior,
-                navigateUp = navigateBack
+                onBackClick = onBack
+
+            )
+        },
+        bottomBar = {
+            BottomAppBarDefaults(
+                navController = rememberNavController(),
+                onEventClick = onEventClick,
+                onPesertaClick = onPesertaClick,
+                onTiketClick = onTiketClick,
+                onTransaksiClick = onTransaksiClick
             )
         }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
-        ) {
-            // Pass the UI state to the EntryBody
-            EntryBodyPeserta(
-                insertPesertaUiState = PesertauiState,
-                onPesertaValueChange = { updatedValue ->
-                    viewModel.updatePesertaState(updatedValue) // Update ViewModel state
-                },
-                onSaveClick = {
-                    PesertauiState.insertPesertaUiEvent?.let { insertPesertaUiEvent ->
-                        coroutineScope.launch {
-                            // Call ViewModel update method
-                            viewModel.updatePsrta(
-                                id_peserta = viewModel.id_peserta, // Pass the NIM from ViewModel
-                                peserta = insertPesertaUiEvent.toPsrta() // Convert InsertUiEvent to Mahasiswa
-                            )
-                            navigateBack() // Navigate back after saving
-                        }
+    ){padding ->
+        EntryBodyPeserta(
+            modifier = Modifier.padding(padding),
+            insertPesertaUiState = viewModel.updatePesertaUiState,
+            onPesertaValueChange = viewModel::updateInsertPesertaState,
+            onSaveClick = {
+                coroutineScope.launch {
+                    viewModel.updatePeserta()
+                    delay(600)
+                    withContext(Dispatchers.Main) {
+                        onNavigate()
                     }
                 }
-            )
-        }
+            }
+        )
     }
 }
