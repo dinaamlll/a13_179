@@ -1,5 +1,8 @@
 package com.example.a13_179.ui.viewmodel.peserta
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,55 +10,44 @@ import com.example.a13_179.model.Event
 import com.example.a13_179.model.Peserta
 import com.example.a13_179.repository.PesertaRepository
 import com.example.a13_179.ui.view.peserta.DestinasiDetailPeserta
+import com.example.a13_179.ui.view.peserta.DestinasiDetailPeserta.id_peserta
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-sealed class DetailPesertaUiState {
-    data class Success(val peserta: Peserta) : DetailPesertaUiState()
-    object Error : DetailPesertaUiState()
-    object Loading : DetailPesertaUiState()
-}
 
 class DetailPesertaViewModel(
-    savedStateHandle: SavedStateHandle,
-    private val psrta: PesertaRepository
+    private val pesertaRepository: PesertaRepository
 ) : ViewModel() {
 
-    private val _idPeserta: Int = savedStateHandle.get<String>(DestinasiDetailPeserta.ID_PESERTA)
-        ?.toIntOrNull()
-        ?: throw IllegalArgumentException("Invalid ID_PESERTA value")
-    // StateFlow untuk menyimpan status UI
-    private val _detailPesertaUiState = MutableStateFlow<DetailPesertaUiState>(DetailPesertaUiState.Loading)
-    val detailPesertaUiState: StateFlow<DetailPesertaUiState> = _detailPesertaUiState
-
-    init {
-        getDetailPeserta()
-    }
-
-    fun getDetailPeserta() {
+    var uiState by mutableStateOf(DetailPesertaUiState())
+        private set
+    fun getDetailPeserta(id_peserta:Int) {
         viewModelScope.launch {
+            uiState = DetailPesertaUiState(isLoading = true)
             try {
-                // Set loading state
-                _detailPesertaUiState.value = DetailPesertaUiState.Loading
+                val peserta = pesertaRepository.getPesertaById(id_peserta)
 
-                // Fetch mahasiswa data dari repository
-                val peserta = psrta.getPesertaById(_idPeserta)
-
-                if (peserta != null) {
-                    // Jika data ditemukan, emit sukses
-                    _detailPesertaUiState.value = DetailPesertaUiState.Success(peserta)
-                } else {
-                    // Jika data tidak ditemukan, emit error
-                    _detailPesertaUiState.value = DetailPesertaUiState.Error
-                }
+                // Mengubah state dengan data bangunan yang diterima
+                uiState = DetailPesertaUiState(detailPesertaUiEvent = peserta.toDetailPesertaUiEvent())
             } catch (e: Exception) {
-                // Emit error jika terjadi exception
-                _detailPesertaUiState.value = DetailPesertaUiState.Error
+                e.printStackTrace()
+
+                // Menangani error jika request gagal
+                uiState = DetailPesertaUiState(isError = true, errorMessage = "Failed to fetch details: ${e.message}")
             }
         }
     }
 }
 
+data class DetailPesertaUiState(
+    val detailPesertaUiEvent: InsertPesertaUiEvent = InsertPesertaUiEvent(),
+    val isLoading: Boolean = false,
+    val isError: Boolean = false,
+    val errorMessage: String = "",
+) {
+    val isUiEventNotEmpty: Boolean
+        get() = detailPesertaUiEvent != InsertPesertaUiEvent()
+}
 //memindahkan data dari entity ke ui
 fun Peserta.toDetailPesertaUiEvent(): InsertPesertaUiEvent {
     return InsertPesertaUiEvent(
