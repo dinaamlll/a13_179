@@ -13,24 +13,23 @@ import okio.IOException
 
 sealed class HomeEventUiState {
     data class Success(val event: List<Event>) : HomeEventUiState()
-    data class EventDetail(val event: Event) : HomeEventUiState()
     object Error : HomeEventUiState()
     object Loading : HomeEventUiState()
 }
 
 class HomeEventViewModel(private val evnt: EventRepository) : ViewModel() {
-    var eventUIState: HomeEventUiState by mutableStateOf(HomeEventUiState.Loading)
+    var evntUiState: HomeEventUiState by mutableStateOf(HomeEventUiState.Loading)
         private set
 
     init {
-        getEventList()
+        getEvnt()
     }
 
-    // Get list of events
-    fun getEventList() {
+    // Fungsi untuk mengambil event
+    fun getEvnt() {
         viewModelScope.launch {
-            eventUIState = HomeEventUiState.Loading
-            eventUIState = try {
+            evntUiState = HomeEventUiState.Loading
+            evntUiState = try {
                 HomeEventUiState.Success(evnt.getAllEvent())
             } catch (e: IOException) {
                 HomeEventUiState.Error
@@ -40,59 +39,17 @@ class HomeEventViewModel(private val evnt: EventRepository) : ViewModel() {
         }
     }
 
-    // Get event detail by ID
-    fun getEventDetail(id_event: Int) {
-        viewModelScope.launch {
-            eventUIState = HomeEventUiState.Loading
-            eventUIState = try {
-                val event = evnt.getEventById(id_event)
-                HomeEventUiState.EventDetail(event)
-            } catch (e: IOException) {
-                HomeEventUiState.Error
-            } catch (e: HttpException) {
-                HomeEventUiState.Error
-            }
-        }
-    }
-
-    // Insert a new event
-    fun insertEvent(event: Event) {
+    // Fungsi untuk menghapus event dengan id_event bertipe Int
+    fun deleteEvnt(id_event: Int) {
         viewModelScope.launch {
             try {
-                evnt.insertEvent(event)
-                getEventList() // Refresh list after adding
-            } catch (e: IOException) {
-                eventUIState = HomeEventUiState.Error
-            } catch (e: HttpException) {
-                eventUIState = HomeEventUiState.Error
-            }
-        }
-    }
-
-    // Update an existing event
-    fun updateEvents(event: Event) {
-        viewModelScope.launch {
-            try {
-                evnt.updateEvent(event.id_event, event)
-                getEventList() // Refresh list after editing
-            } catch (e: IOException) {
-                eventUIState = HomeEventUiState.Error
-            } catch (e: HttpException) {
-                eventUIState = HomeEventUiState.Error
-            }
-        }
-    }
-
-    // Delete an event by ID
-    fun deleteEvents(id_event: Int) {
-        viewModelScope.launch {
-            try {
+                // Pastikan parameter id_event yang dikirim sesuai dengan tipe data yang diharapkan di repository
                 evnt.deleteEvent(id_event)
-                getEventList() // Refresh list after deletion
+                getEvnt()
             } catch (e: IOException) {
-                eventUIState = HomeEventUiState.Error
+                evntUiState = HomeEventUiState.Error
             } catch (e: HttpException) {
-                eventUIState = HomeEventUiState.Error
+                evntUiState = HomeEventUiState.Error
             }
         }
     }
