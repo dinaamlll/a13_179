@@ -1,30 +1,20 @@
 package com.example.a13_179.ui.view.event
 
-import android.app.DatePickerDialog
-import android.widget.DatePicker
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.material3.Icon
-import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,21 +22,22 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
+import com.example.a13_179.ui.customwidget.BottomAppBarDefaults
 import com.example.a13_179.ui.customwidget.CostumeTopAppBar
 import com.example.a13_179.ui.navigation.DestinasiNavigasi
 import com.example.a13_179.ui.viewmodel.event.InsertEventUiEvent
 import com.example.a13_179.ui.viewmodel.event.InsertEventUiState
 import com.example.a13_179.ui.viewmodel.event.InsertEventViewModel
-import com.example.a13_179.ui.viewmodel.event.PenyediaViewModel
+import com.example.a13_179.ui.viewmodel.event.PenyediaViewModelEvent
 import kotlinx.coroutines.launch
-import java.util.Calendar
+
 
 
 object DestinasiEntryEvent : DestinasiNavigasi {
-    override val route = "item_entry_event"
+    override val route = "entry_event_event"
     override val titleRes = "Entry Event"
 }
 
@@ -54,8 +45,12 @@ object DestinasiEntryEvent : DestinasiNavigasi {
 @Composable
 fun EntryEventScreen(
     navigateBack: () -> Unit,
+    onEventClick: () -> Unit,
+    onPesertaClick: () -> Unit,
+    onTiketClick: () -> Unit,
+    onTransaksiClick: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: InsertEventViewModel = viewModel(factory = PenyediaViewModel.Factory)
+    viewModel: InsertEventViewModel = viewModel(factory = PenyediaViewModelEvent.Factory)
 ) {
     val selectedDate = remember { mutableStateOf("") }
     val datePickerState = rememberDatePickerState()
@@ -69,13 +64,13 @@ fun EntryEventScreen(
             CostumeTopAppBar(
                 title = DestinasiEntryEvent.titleRes,
                 canNavigateBack = true,
-                scrollBehavior = scrollBehavior,
-                navigateUp = navigateBack
+                scrollBehavior = scrollBehavior, //supaya tampilan app bar bisa berubah pas di-scroll, misalnya jadi kecil atau tetap di tempat.
+                onBackClick = navigateBack //buat balik ke halaman sebelumnya.
             )
         }
-    ) { innerPadding ->
+    ){ innerPadding ->
         EntryBodyEvent(
-            insertEventUiState = viewModel.EventuiState,
+            insertEventUiState = viewModel.uiState,
             onEventValueChange = viewModel::updateInsertEventState,
             onSaveClick = {
                 coroutineScope.launch {
@@ -86,12 +81,7 @@ fun EntryEventScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .fillMaxWidth(),
-            onDateSelected = { selectedDateValue ->
-                selectedDate.value = selectedDateValue
-                // Update tanggal di viewModel
-                viewModel.updateInsertEventState(InsertEventUiEvent(tanggal_event = selectedDateValue))
-            }
+                .fillMaxWidth()
         )
     }
 }
@@ -101,7 +91,6 @@ fun EntryBodyEvent(
     insertEventUiState: InsertEventUiState,
     onEventValueChange: (InsertEventUiEvent) -> Unit,
     onSaveClick: () -> Unit,
-    onDateSelected: (String) -> Unit, // Accept the onDateSelected parameter
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -113,7 +102,6 @@ fun EntryBodyEvent(
             insertEventUiEvent = insertEventUiState.insertEventUiEvent,
             onValueChange = onEventValueChange,
             modifier = Modifier.fillMaxWidth(),
-            onDateSelected = onDateSelected // Pass onDateSelected to FormInput
         )
         Button(
             onClick = onSaveClick,
@@ -132,10 +120,8 @@ fun FormInput(
     modifier: Modifier = Modifier,
     onValueChange: (InsertEventUiEvent) -> Unit = {},
     enabled: Boolean = true,
-    onDateSelected: (String) -> Unit // Menerima parameter onDateSelected
+
 ) {
-    val context = LocalContext.current // Mendapatkan context dengan benar di dalam komposabel
-    val showDatePicker = remember { mutableStateOf(false) } // Menyimpan status untuk menunjukkan dialog
 
     Column(
         modifier = modifier,
@@ -143,19 +129,17 @@ fun FormInput(
     ) {
         // Menangani input id_event dengan benar
         OutlinedTextField(
-            value = insertEventUiEvent.id_event?.toString() ?: "", // Menampilkan string kosong jika id_event null
+            value = insertEventUiEvent.id_event.toString(),
             onValueChange = {
-                val newId = it.toIntOrNull() // Mengonversi input menjadi Integer
-                if (newId != null) {
-                    onValueChange(insertEventUiEvent.copy(id_event = newId))
-                }
+                // Safely parse the input as Int
+                val idEvent = it.toIntOrNull() ?: 0  // Default to 0 if invalid
+                onValueChange(insertEventUiEvent.copy(id_event = idEvent))
             },
-            label = { Text("ID") },
+            label = { Text("Id Event") },
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
             singleLine = true
         )
-
         OutlinedTextField(
             value = insertEventUiEvent.nama_event,
             onValueChange = {
@@ -178,36 +162,15 @@ fun FormInput(
             singleLine = true
         )
 
-        // Tanggal event, memunculkan DatePicker saat diklik
         OutlinedTextField(
             value = insertEventUiEvent.tanggal_event,
-            onValueChange = {
-                onValueChange(insertEventUiEvent.copy(tanggal_event = it))
-            },
+            onValueChange = { onValueChange(insertEventUiEvent.copy(tanggal_event = it)) },
             label = { Text("Tanggal Event") },
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
-            singleLine = true,
-            readOnly = true,
-            trailingIcon = {
-                IconButton(onClick = {
-                    // Menampilkan DatePicker
-                    showDatePicker.value = true
-                }) {
-                    Icon(Icons.Default.DateRange, contentDescription = "Pilih Tanggal")
-                }
-            }
+            singleLine = true
         )
 
-        // Memanggil DatePicker menggunakan Compose
-        if (showDatePicker.value) {
-            ShowDatePickerDialog(
-                onDateSelected = { date ->
-                    onDateSelected(date)
-                    showDatePicker.value = false
-                }
-            )
-        }
 
         // Menambahkan input untuk lokasi event
         OutlinedTextField(
@@ -220,31 +183,5 @@ fun FormInput(
             enabled = enabled,
             singleLine = true
         )
-    }
-}
-
-@Composable
-fun ShowDatePickerDialog(onDateSelected: (String) -> Unit) { //ShowDatePickerDialog untuk menampilkan dialog pemilih tanggal
-    val context = LocalContext.current
-    val calendar = Calendar.getInstance()
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
-
-    // Create a DatePickerDialog in Compose style
-    val datePickerDialog = remember {
-        DatePickerDialog(
-            context,
-            { _, selectedYear, selectedMonth, selectedDay ->
-                val date = "$selectedYear-${selectedMonth + 1}-$selectedDay"
-                onDateSelected(date)
-            },
-            year, month, dayOfMonth
-        )
-    }
-
-    // Show the DatePicker dialog when triggered
-    LaunchedEffect(Unit) {
-        datePickerDialog.show()
     }
 }
