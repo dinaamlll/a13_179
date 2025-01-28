@@ -1,165 +1,158 @@
 package com.example.a13_179.ui.view.peserta
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MonotonicFrameClock
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.a13_179.model.Peserta
-import com.example.a13_179.ui.customwidget.CostumeTopAppBar
+import androidx.navigation.compose.rememberNavController
+import com.example.a13_179.ui.customwidget.BottomAppBarDefaults
 import com.example.a13_179.ui.navigation.DestinasiNavigasi
-import com.example.a13_179.ui.viewmodel.event.PenyediaViewModel
-import com.example.a13_179.ui.viewmodel.peserta.DetailPesertaUiState
+import com.example.a13_179.ui.view.peserta.DestinasiDetailPeserta.id_peserta
 import com.example.a13_179.ui.viewmodel.peserta.DetailPesertaViewModel
-
+import com.example.a13_179.ui.viewmodel.peserta.PenyediaViewModelPeserta
 
 object DestinasiDetailPeserta : DestinasiNavigasi {
-    override val route = "detail_peserta" // base route
-    const val ID_PESERTA = "id_peserta" // Nama parameter untuk id
-    val routesWithArg = "$route/{$ID_PESERTA}" // Route yang menerima id sebagai argumen
-    override val titleRes = "Detail Peserta" // Title untuk halaman ini
+    override val route = "detail/{id_peserta}"
+    override val titleRes = "Detail Peserta"
+    const val id_peserta = "id_peserta"
+    val routeWithArgs = "$route/{$id_peserta}"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailPasienView(
-    idPeserta: Int,
+fun DetailPesertaScreen(
+    id_peserta: Int,
+    onEventClick: () -> Unit,
+    onPesertaClick: () -> Unit,
+    onTiketClick: () -> Unit,
+    onTransaksiClick: () -> Unit,
+    onEditClick: (Int) -> Unit,
+    onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: DetailPesertaViewModel = viewModel(factory = PenyediaViewModel.Factory),
-    onEditClick: (Int) -> Unit = {},
-    navigateBack:()->Unit,
+    viewModel: DetailPesertaViewModel = viewModel(factory = PenyediaViewModelPeserta.Factory)
 ) {
+    val peserta = viewModel.uiState.detailPesertaUiEvent
+
+    LaunchedEffect(id_peserta) {
+        viewModel.getDetailPeserta(id_peserta)
+    }
+
+    val isLoading = viewModel.uiState.isLoading
+    val isError = viewModel.uiState.isError
+    val errorMessage = viewModel.uiState.errorMessage
+
     Scaffold(
         topBar = {
-            CostumeTopAppBar(
-                title = DestinasiDetailPeserta.titleRes,
-                canNavigateBack = true,
-
-                navigateUp = navigateBack,
-                onRefresh = { viewModel.getDetailPeserta() } // Trigger refresh action on refresh
+            CenterAlignedTopAppBar(
+                title = { Text(DestinasiDetailPeserta.titleRes)},
+                navigationIcon = {
+                    IconButton(onClick = {onBackClick() }) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors()
+            )
+        },
+        bottomBar = {
+            BottomAppBarDefaults(
+                navController = rememberNavController(),
+                onEventClick = onEventClick,
+                onPesertaClick = onPesertaClick,
+                onTiketClick = onTiketClick,
+                onTransaksiClick = onTransaksiClick
             )
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { onEditClick(idPeserta) },
-                shape = MaterialTheme.shapes.medium,
+                onClick = { onEditClick(peserta.id_peserta) },
                 modifier = Modifier.padding(16.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "Edit Mahasiswa"
-                )
+                Icon(imageVector = Icons.Filled.Edit, contentDescription = "Edit Peserta")
             }
-        }
-    ) { innerPadding ->
-        val detailPesertaUiState by viewModel.detailPesertaUiState.collectAsState()
-
-        BodyDetailPeserta(
-            modifier = Modifier.padding(innerPadding),
-            detailPesertaUiState = detailPesertaUiState,
-            retryAction = { viewModel.getDetailPeserta() }
-        )
-    }
-}
-@Composable
-fun BodyDetailPeserta(
-    modifier: Modifier = Modifier,
-    detailPesertaUiState: DetailPesertaUiState,
-    retryAction: () -> Unit = {}
-) {
-    when (detailPesertaUiState) {
-        is DetailPesertaUiState.Loading -> {
-            // Menampilkan gambar loading saat data sedang dimuat
-            OnLoading(modifier = modifier.fillMaxSize())
-        }
-        is DetailPesertaUiState.Success -> {
-            // Menampilkan detail mahasiswa jika berhasil
-            Column(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+        },
+        content = { paddingValues ->
+            Box (
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
             ) {
-                ItemDetailPeserta(peserta = detailPesertaUiState.peserta)
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                } else if (isError) {
+                    Text(
+                        text = errorMessage,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                } else if (viewModel.uiState.isUiEventNotEmpty) {
+                    Column (
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            elevation = CardDefaults.cardElevation(8.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = "Id Peserta: ${peserta.id_peserta}",
+                                    style = MaterialTheme.typography.bodyLarge)
+                                Text(
+                                    text = "Nama Peserta: ${peserta.nama_peserta}"
+                                    , style = MaterialTheme.typography.bodyLarge)
+                                Text(text = "Email: ${peserta.email}"
+                                    , style = MaterialTheme.typography.bodyLarge)
+                                Text(text = "Nomor Telepon: ${peserta.nomor_telepon}"
+                                    , style = MaterialTheme.typography.bodyLarge)
+                            }
+                        }
+                        Row (
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ){
+                            Button(onClick = {onEditClick(peserta.id_peserta)}) {
+                                Text("Edit Data")
+                            }
+                        }
+                    }
+                }
             }
         }
-        is DetailPesertaUiState.Error -> {
-            // Menampilkan error jika data gagal dimuat
-            OnError(
-                retryAction = retryAction,
-                modifier = modifier.fillMaxSize()
-            )
-        }
-        else -> {
-            // Menangani kasus yang tidak terduga (optional, jika Anda ingin menangani hal ini)
-            // Anda bisa menambahkan logika untuk menangani kesalahan yang tidak diketahui
-            Text("Unexpected state encountered")
-        }
-    }
-
-}
-
-@Composable
-fun ItemDetailPeserta(
-    peserta: Peserta
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-        )
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            ComponentDetailMhs(judul = "Id Peserta", isinya = peserta.id_peserta.toString())
-            Spacer(modifier = Modifier.padding(4.dp))
-            ComponentDetailMhs(judul = "Nama Peserta", isinya = peserta.nama_peserta)
-            Spacer(modifier = Modifier.padding(4.dp))
-            ComponentDetailMhs(judul = "Email", isinya = peserta.email)
-            Spacer(modifier = Modifier.padding(4.dp))
-            ComponentDetailMhs(judul = "Nomor Telepon", isinya = peserta.nomor_telepon)
-        }
-    }
-}
-
-@Composable
-fun ComponentDetailMhs(
-    judul: String,
-    isinya: String
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.Start
-    ) {
-        Text(
-            text = "$judul :",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Gray
-        )
-        Text(
-            text = isinya,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
+    )
 }
