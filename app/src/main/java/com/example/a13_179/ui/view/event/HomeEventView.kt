@@ -1,6 +1,5 @@
 package com.example.a13_179.ui.view.event
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,42 +36,52 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
+import com.example.a13_179.R
 import com.example.a13_179.model.Event
+import com.example.a13_179.ui.customwidget.BottomAppBarDefaults
 import com.example.a13_179.ui.customwidget.CostumeTopAppBar
 import com.example.a13_179.ui.navigation.DestinasiNavigasi
+import com.example.a13_179.ui.view.event.DestinasiDetailEvent.id_event
+import com.example.a13_179.ui.view.peserta.HomeStatus
+import com.example.a13_179.ui.view.tiket.OnLoading
 import com.example.a13_179.ui.viewmodel.event.HomeEventUiState
 import com.example.a13_179.ui.viewmodel.event.HomeEventViewModel
-import com.example.a13_179.ui.viewmodel.event.PenyediaViewModel
-import com.example.a13_179.R
+import com.example.a13_179.ui.viewmodel.event.PenyediaViewModelEvent
 
-
-
-object DestinasiHomeEvent: DestinasiNavigasi {
-    override val route ="home_event"
+object DestinasiHomeEvent : DestinasiNavigasi {
+    override val route = "home_event"
     override val titleRes = "Home Event"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeEventScreen(
-    navigateToItemEntry:()->Unit,
-    modifier: Modifier=Modifier,
-    onDetailClick: (Int) -> Unit ={},
-    viewModel: HomeEventViewModel = viewModel(factory = PenyediaViewModel.Factory)
+    navigateToItemEntry: () -> Unit,
+    modifier: Modifier = Modifier,
+    onDetailClick: (Int) -> Unit = {},
+    onEventClick: () -> Unit,
+    onPesertaClick: () -> Unit,
+    onTiketClick: () -> Unit,
+    onTransaksiClick: () -> Unit,
+    viewModel: HomeEventViewModel = viewModel(factory = PenyediaViewModelEvent.Factory)
+) {
 
-){
+
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             CostumeTopAppBar(
                 title = DestinasiHomeEvent.titleRes,
-                canNavigateBack = false,
+                canNavigateBack = true,
                 scrollBehavior = scrollBehavior,
                 onRefresh = {
-                    viewModel.getEventList ()}
+                    viewModel.getEvnt()},
+
             )
         },
+
         floatingActionButton = {
             FloatingActionButton(
                 onClick = navigateToItemEntry,
@@ -82,13 +91,14 @@ fun HomeEventScreen(
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add Event")
             }
         },
-    ) { innerPadding->
+    ) { innerPadding ->
         HomeEventStatus(
             homeEventUiState = viewModel.eventUIState,
             retryAction = {viewModel.getEventList()}, modifier = Modifier.padding(innerPadding),
             onDetailClick = onDetailClick,onDeleteClick = {
                 viewModel.deleteEvents(it.id_event)
                 viewModel.getEventList()
+                }
             }
         )
     }
@@ -101,64 +111,47 @@ fun HomeEventStatus(
     modifier: Modifier = Modifier,
     onDeleteClick: (Event) -> Unit,
     onDetailClick: (Int) -> Unit
-){
-    when (homeEventUiState){
-        is HomeEventUiState.Loading-> OnLoading(modifier = modifier.fillMaxSize())
-
-        is HomeEventUiState.Success ->
-            if(homeEventUiState.event.isEmpty()){
-                 Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+) {
+    when (homeEventUiState) {
+        is HomeEventUiState.Loading -> OnLoading(modifier = modifier.fillMaxSize())
+        is HomeEventUiState.Success -> {
+            if (homeEventUiState.event.isEmpty()) {
+                Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(text = "Tidak ada data Event")
                 }
-            }else{
-                EventsLayout(
-                    event = homeEventUiState.event,modifier = modifier.fillMaxWidth(),
-                    onDetailClick = { onDetailClick(it.id_event) },
-                    onDeleteClick={
-                        onDeleteClick(it)
-                    }
+            } else {
+                EventLayout(
+                    event = homeEventUiState.event,
+                    modifier = modifier.fillMaxWidth(),
+                    onDetailClick = onDetailClick,
+                    onDeleteClick = { onDeleteClick(it) }
                 )
             }
-        is HomeEventUiState.Error -> OnError(retryAction, modifier = modifier.fillMaxSize())
-        else -> {
-            // Default handling jika ada tipe baru
-            Box(
-                modifier = modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "Status tidak dikenal.")
-            }
         }
+        is HomeEventUiState.Error -> OnError(retryAction, modifier = modifier.fillMaxSize())
     }
 }
-/**
- * The home screen displaying the loading message.
- */
+
 @Composable
-fun OnLoading(modifier: Modifier = Modifier){
+fun OnLoading(modifier: Modifier = Modifier) {
     Image(
         modifier = modifier.size(200.dp),
-        painter = painterResource(id = R.drawable.loading),
+        painter = painterResource(R.drawable.loading),
         contentDescription = stringResource(R.string.loading)
     )
 }
 
-/**
- * The home screen displaying error message with re-attempt button.
- */
-
 @Composable
-fun OnError(retryAction:()->Unit, modifier: Modifier = Modifier){
+fun OnError(retryAction: () -> Unit, modifier: Modifier = Modifier) {
     Column(
-        modifier=modifier,
+        modifier = modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
             painter = painterResource(id = R.drawable.error), contentDescription = ""
         )
-
-        Text(text = stringResource(R.string.loading_failed), modifier = Modifier.padding(16.dp))
+        Text(text = stringResource(R.string.loading), modifier = Modifier.padding(16.dp))
         Button(onClick = retryAction) {
             Text(stringResource(R.string.retry))
         }
@@ -166,39 +159,39 @@ fun OnError(retryAction:()->Unit, modifier: Modifier = Modifier){
 }
 
 @Composable
-fun EventsLayout(
+fun EventLayout(
     event: List<Event>,
     modifier: Modifier = Modifier,
-    onDetailClick:(Event)->Unit,
+    onDetailClick: (Int) -> Unit,
     onDeleteClick: (Event) -> Unit = {}
-){
+) {
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(event){ event ->
+        items(event) { event ->
             EventsCard(
                 event = event,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onDetailClick(event) },
-                onDeleteClick ={
-                    onDeleteClick(event)
-                }
+                    .fillMaxWidth(),
+                onDetailClick = onDetailClick,
+                onDeleteClick = { onDeleteClick(it) }
             )
-
         }
     }
 }
+@OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
 fun EventsCard(
     event: Event,
     modifier: Modifier = Modifier,
-    onDeleteClick:(Event)->Unit={}
-){
+    onDetailClick: (Int) -> Unit,
+    onDeleteClick: (Event) -> Unit = {}
+) {
     Card(
+        onClick = { onDetailClick(event.id_event) },
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
@@ -219,17 +212,18 @@ fun EventsCard(
                 IconButton(onClick = { onDeleteClick(event) }) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = null,
+                        contentDescription = null
                     )
                 }
             }
-                // Menampilkan id_event
-                Text(
-                    text = "ID: ${event.id_event}",
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-
+            Text(// Menampilkan id_event
+                text = "ID: ${event.id_event}",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = event.deskripsi_event,
+                style = MaterialTheme.typography.titleMedium
+            )
             Text(
                 text = event.tanggal_event,
                 style = MaterialTheme.typography.titleMedium
