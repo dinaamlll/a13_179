@@ -83,7 +83,7 @@ fun DetailTiketView(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(DestinasiDetailPeserta.titleRes)},
+                title = { Text(DestinasiDetailTiket.titleRes)},
                 navigationIcon = {
                     IconButton(onClick = {onBackClick() }) {
                         Icon(
