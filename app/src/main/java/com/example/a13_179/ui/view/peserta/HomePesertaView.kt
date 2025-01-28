@@ -31,6 +31,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -52,7 +53,7 @@ import com.example.a13_179.ui.viewmodel.peserta.PenyediaViewModelPeserta
 
 object DestinasiHomePeserta : DestinasiNavigasi {
     override val route = "home_peserta"
-    override val titleRes = "Home Peserta"
+    override val titleRes = "Selamat Datang di Halaman Peserta"
     const val id_transaksi = "id_transaksi"
     val routesWithArg = "$route/{$id_transaksi}"
 }
@@ -100,11 +101,13 @@ fun HomePesertaScreen(
             FloatingActionButton(
                 onClick = navigateToItemEntry,
                 shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.padding(18.dp)
+                modifier = Modifier.padding(18.dp),
+                containerColor = Color(0xFFF48FB1)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add Peserta"
+                    contentDescription = "Add Peserta",
+                    tint = MaterialTheme.colorScheme.onSecondary
                 )
             }
         }
@@ -140,7 +143,7 @@ fun HomeStatus(
                     modifier = modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Tidak Ada Data Peserta")
+                    Text(text = "Tidak Ada Data Peserta",color = Color(0xFFD81B60))
                 }
             } else {
                 PesertaLayout(
@@ -157,7 +160,31 @@ fun HomeStatus(
         is HomePesertaUiState.Error -> OnError(retryAction, modifier = modifier.fillMaxSize())
     }
 }
+@Composable
+fun OnLoading(modifier: Modifier = Modifier) {
+    Image(
+        modifier = modifier.size(200.dp),
+        painter = painterResource(R.drawable.loading),
+        contentDescription = stringResource(R.string.loading)
+    )
+}
 
+@Composable
+fun OnError(retryAction: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.error), contentDescription = ""
+        )
+        Text(text = stringResource(R.string.loading), color = Color(0xFFD81B60), modifier = Modifier.padding(16.dp))
+        Button(onClick = retryAction, colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC1E3))) {
+            Text(stringResource(R.string.retry))
+        }
+    }
+}
 @Composable
 fun PesertaLayout(
     peserta: List<Peserta>,
@@ -183,7 +210,7 @@ fun PesertaLayout(
         }
     }
 }
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PesertaCard(
     peserta: Peserta,
@@ -193,6 +220,7 @@ fun PesertaCard(
     Card(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFC1E3)), // Pink Card Background
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column(
@@ -205,27 +233,28 @@ fun PesertaCard(
             ) {
                 Text(
                     text = peserta.id_peserta.toString(),
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleMedium.copy(color = Color(0xFFD81B60))
                 )
                 Spacer(Modifier.weight(1f))
                 IconButton(onClick = { onDeleteClick(peserta) }) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = null
+                        contentDescription = null,
+                        tint = Color(0xFFD81B60)
                     )
                 }
                 Text(
                     text = peserta.nama_peserta,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium.copy(color = Color(0xFFD81B60))
                 )
             }
             Text(
                 text = peserta.email,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium.copy(color = Color(0xFFD81B60))
             )
             Text(
                 text = peserta.nomor_telepon,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium.copy(color = Color(0xFFD81B60))
             )
         }
     }

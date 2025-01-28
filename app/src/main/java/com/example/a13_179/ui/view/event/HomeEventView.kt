@@ -31,6 +31,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -51,7 +52,7 @@ import com.example.a13_179.ui.viewmodel.event.PenyediaViewModelEvent
 
 object DestinasiHomeEvent : DestinasiNavigasi {
     override val route = "home_event"
-    override val titleRes = "Home Event"
+    override val titleRes = "Selamat Datang di Halaman Event"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,8 +67,6 @@ fun HomeEventScreen(
     onTransaksiClick: () -> Unit,
     viewModel: HomeEventViewModel = viewModel(factory = PenyediaViewModelEvent.Factory)
 ) {
-
-
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -79,7 +78,7 @@ fun HomeEventScreen(
                 onRefresh = {
                     viewModel.getEvnt()},
 
-            )
+                )
         },
         bottomBar = {
             BottomAppBarDefaults(
@@ -94,9 +93,11 @@ fun HomeEventScreen(
             FloatingActionButton(
                 onClick = navigateToItemEntry,
                 shape = MaterialTheme.shapes.medium,
+                containerColor = Color(0xFFF48FB1), // Pink Floating Button
                 modifier = Modifier.padding(18.dp)
             ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Event")
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Event",
+                    tint = MaterialTheme.colorScheme.onSecondary  )
             }
         },
     ) { innerPadding ->
@@ -107,9 +108,9 @@ fun HomeEventScreen(
                 it.id_event?.let { id ->
                     viewModel.deleteEvnt(it.id_event)
                     viewModel.getEvnt()
-            }
-    })
-}}
+                }
+            })
+    }}
 
 @Composable
 fun HomeEventStatus(
@@ -124,7 +125,7 @@ fun HomeEventStatus(
         is HomeEventUiState.Success -> {
             if (homeEventUiState.event.isEmpty()) {
                 Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "Tidak ada data Event")
+                    Text(text = "Tidak ada data Event", color = Color(0xFFD81B60))
                 }
             } else {
                 EventLayout(
@@ -158,8 +159,8 @@ fun OnError(retryAction: () -> Unit, modifier: Modifier = Modifier) {
         Image(
             painter = painterResource(id = R.drawable.error), contentDescription = ""
         )
-        Text(text = stringResource(R.string.loading), modifier = Modifier.padding(16.dp))
-        Button(onClick = retryAction) {
+        Text(text = stringResource(R.string.loading), color = Color(0xFFD81B60), modifier = Modifier.padding(16.dp))
+        Button(onClick = retryAction, colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC1E3))) {
             Text(stringResource(R.string.retry))
         }
     }
@@ -201,6 +202,7 @@ fun EventsCard(
         onClick = { onDetailClick(event.id_event) },
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFC1E3)),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column(
@@ -213,31 +215,38 @@ fun EventsCard(
             ) {
                 Text(
                     text = event.nama_event,
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color(0xFFD81B60)
                 )
                 Spacer(Modifier.weight(1f))
                 IconButton(onClick = { onDeleteClick(event) }) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = null
+                        contentDescription = null,
+                        tint = Color(0xFFD81B60)
                     )
                 }
             }
             Text(// Menampilkan id_event
                 text = "ID: ${event.id_event}",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = Color(0xFFD81B60)
             )
             Text(
                 text = event.deskripsi_event,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = Color(0xFFD81B60)
             )
             Text(
                 text = event.tanggal_event,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = Color(0xFFD81B60)
             )
             Text(
                 text = event.lokasi_event,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = Color(0xFFD81B60)
+
             )
         }
     }

@@ -35,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -56,7 +57,7 @@ import com.example.a13_179.ui.viewmodel.tiket.PenyediaViewModelTiket
 
 object DestinasiHomeTiket: DestinasiNavigasi {
     override val route ="home_tiket"
-    override val titleRes = "Home Tiket"
+    override val titleRes = "Selamat Datang di Halaman Tiket"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,9 +99,11 @@ fun HomeTiketScreen(
             FloatingActionButton(
                 onClick = navigateToItemEntry,
                 shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.padding(18.dp)
+                modifier = Modifier.padding(18.dp),
+                containerColor = Color(0xFFF48FB1),
             ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Tiket")
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Tiket",
+                    tint = MaterialTheme.colorScheme.onSecondary  )
             }
         },
     ) { innerPadding->
@@ -129,7 +132,7 @@ fun HomeTiketStatus(
         is HomeTiketUiState.Success ->
             if(homeTiketUiState.tiket.isEmpty()){
                 return Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-                    Text(text = "Tidak Ada Data Tiket")
+                    Text(text = "Tidak Ada Data Tiket",color = Color(0xFFD81B60))
                 }
             }else{
                 TiketLayout(
@@ -172,8 +175,8 @@ fun OnError(retryAction:()->Unit, modifier: Modifier = Modifier){
         Image(
             painter = painterResource(id = R.drawable.error), contentDescription = ""
         )
-        Text(text = stringResource(R.string.loading_failed), modifier = Modifier.padding(16.dp))
-        Button(onClick = retryAction) {
+        Text(text = stringResource(R.string.loading_failed),color = Color(0xFFD81B60), modifier = Modifier.padding(16.dp))
+        Button(onClick = retryAction, colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC1E3))) {
             Text(stringResource(R.string.retry))
         }
     }
@@ -215,6 +218,7 @@ fun TiketCard( //TiketCard utk menampilkan detail tiket dengan opsi hapus
     Card(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFC1E3)),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column(
@@ -227,8 +231,9 @@ fun TiketCard( //TiketCard utk menampilkan detail tiket dengan opsi hapus
             ) {
                 Text(
                     text = tiket.id_tiket.toString(),
-                    style = MaterialTheme.typography.titleLarge)
-
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color(0xFFD81B60)
+                )
                 Spacer(Modifier.weight(1f))
                 IconButton(onClick = { onDeleteClickTiket(tiket) }) {
                     Icon(
@@ -238,15 +243,18 @@ fun TiketCard( //TiketCard utk menampilkan detail tiket dengan opsi hapus
                 }
             }
             Text(text = tiket.id_tiket.toString(),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleMedium,
+                color = Color(0xFFD81B60)
             )
             Text(
                 text = tiket.kapasitas_tiket.toString(),
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = Color(0xFFD81B60)
             )
             Text(
                 text = tiket.harga_tiket.toString(),
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = Color(0xFFD81B60)
             )
         }
     }

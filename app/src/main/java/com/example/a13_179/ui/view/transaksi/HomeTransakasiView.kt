@@ -31,6 +31,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -49,7 +50,7 @@ import com.example.a13_179.ui.viewmodel.transaksi.HomeTransaksiViewModel
 
 object DestinasiHomeTransaksi: DestinasiNavigasi {
     override val route ="home_transaksi"
-    override val titleRes = "Home Transaksi"
+    override val titleRes = "Selamat Datang di Halaman Transaksi"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,6 +91,7 @@ fun HomeTransaksiScreen(
             FloatingActionButton(
                 onClick = navigateToItemEntry,
                 shape = MaterialTheme.shapes.medium,
+                containerColor = Color(0xFFF48FB1),
                 modifier = Modifier.padding(18.dp)
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add Tiket")
@@ -121,7 +123,7 @@ fun HomeTransaksiStatus(
         is HomeTransaksiUiState.Success ->
             if(homeTransaksiUiState.transaksi.isEmpty()){
                 return Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-                    Text(text = "Tidak Ada Data Transaksi")
+                    Text(text = "Tidak Ada Data Transaksi", color = Color(0xFFD81B60))
                 }
             }else{
                 TransaksiLayout(
@@ -164,8 +166,8 @@ fun OnError(retryAction:()->Unit, modifier: Modifier = Modifier){
         Image(
             painter = painterResource(id = R.drawable.error), contentDescription = ""
         )
-        Text(text = stringResource(R.string.loading_failed), modifier = Modifier.padding(16.dp))
-        Button(onClick = retryAction) {
+        Text(text = stringResource(R.string.loading), color = Color(0xFFD81B60), modifier = Modifier.padding(16.dp))
+        Button(onClick = retryAction, colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC1E3))) {
             Text(stringResource(R.string.retry))
         }
     }
@@ -207,6 +209,7 @@ fun TransaksiCard( //PesertaCard utk menampilkan detail peserta dengan opsi hapu
     Card(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFC1E3)),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column(
@@ -218,11 +221,15 @@ fun TransaksiCard( //PesertaCard utk menampilkan detail peserta dengan opsi hapu
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = null,
+                        tint = Color(0xFFD81B60)
                     )
                 }
             }
-            Text(text = transaksi.id_tiket.toString(), style = MaterialTheme.typography.bodyMedium)
-            Text(text = transaksi.tanggal_transaksi, style = MaterialTheme.typography.bodyMedium)
-            Text(text = "Jumlah Pembayaran: Rp. ${transaksi.jumlah_pembayaran}", style = MaterialTheme.typography.bodyMedium)
+            Text(text = transaksi.id_tiket.toString(), style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xFFD81B60))
+            Text(text = transaksi.tanggal_transaksi, style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xFFD81B60))
+            Text(text = "Jumlah Pembayaran: Rp. ${transaksi.jumlah_pembayaran}", style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xFFD81B60)  )
         }
     }
