@@ -1,6 +1,5 @@
 package com.example.a13_179.ui.viewmodel.peserta
 
-
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -14,38 +13,38 @@ import okio.IOException
 
 sealed class HomePesertaUiState {
     data class Success(val peserta: List<Peserta>) : HomePesertaUiState()
-    object  Error : HomePesertaUiState()
+    object Error : HomePesertaUiState()
     object Loading : HomePesertaUiState()
 }
 
-class HomePesertaViewModel (private val psrta: PesertaRepository) : ViewModel(){
+class HomePesertaViewModel(private val pesertaRepository: PesertaRepository) : ViewModel() {
     var psrtaUIState: HomePesertaUiState by mutableStateOf(HomePesertaUiState.Loading)
         private set
+
     init {
         getPsrta()
     }
 
-    fun getPsrta(){
+    fun getPsrta() {
         viewModelScope.launch {
             psrtaUIState = HomePesertaUiState.Loading
             psrtaUIState = try {
-                HomePesertaUiState.Success(psrta.getPeserta())
-            }catch (e:IOException){
+                HomePesertaUiState.Success(pesertaRepository.getPeserta())
+            } catch (e: IOException) {
                 HomePesertaUiState.Error
-            }catch (e:HttpException){
+            } catch (e: HttpException) {
                 HomePesertaUiState.Error
             }
         }
     }
 
-    fun deletePsrta(id_peserta: Int){
+    fun deletePsrta(id_peserta: Int) {
         viewModelScope.launch {
             try {
-                psrta.deletePeserta(id_peserta)
-            }catch (e:IOException){
-                HomePesertaUiState.Error
-            }catch (e:HttpException){
-                HomePesertaUiState.Error
+                pesertaRepository.deletePeserta(id_peserta)
+                // Update state jika diperlukan
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
