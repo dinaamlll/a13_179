@@ -1,6 +1,8 @@
 package com.example.a13_179.ui.viewmodel.peserta
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,51 +13,40 @@ import kotlinx.coroutines.launch
 
 class UpdatePesertaViewModel(
     savedStateHandle: SavedStateHandle,
-    private val psrta: PesertaRepository
+    private val repositoryPeserta: PesertaRepository
 ) : ViewModel() {
 
-    // Retrieve the NIM from SavedStateHandle
-    val id_peserta: Int = checkNotNull(savedStateHandle[DestinasiUpdatePeserta.ID_PESERTA])
-
-    var PesertauiState = mutableStateOf(InsertPesertaUiState())
+    var updatePesertaUiState by mutableStateOf(InsertPesertaUiState())
         private set
 
+    private val _id_peserta: Int =
+        checkNotNull(savedStateHandle[DestinasiUpdatePeserta.id_peserta])
+
     init {
-        ambilPeserta()
+        // Ambil data peserta berdasarkan ID saat ViewModel diinisialisasi
+        viewModelScope.launch {
+            updatePesertaUiState = repositoryPeserta
+                .getPesertaById(_id_peserta)
+                .toPesertaUiState()
+        }
     }
 
-    private fun ambilPeserta() {
+    // Fungsi untuk memperbarui UI state dengan event baru
+    fun updateInsertPesertaState(insertPesertaUiEvent: InsertPesertaUiEvent) {
+        updatePesertaUiState = InsertPesertaUiState(insertPesertaUiEvent = insertPesertaUiEvent)
+    }
+
+    // Fungsi untuk memperbarui peserta di repository
+    fun updatePeserta() {
         viewModelScope.launch {
             try {
-                val peserta = psrta.getPesertaById(id_peserta)
-                peserta?.let {
-                    PesertauiState.value = it.toInsertPesertaUIEvent() // Update state with the fetched data
-                }
+                repositoryPeserta.updatePeserta(
+                    _id_peserta,
+                    updatePesertaUiState.insertPesertaUiEvent.toPsrta()
+                )
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
-    }
-
-    // Update the mahasiswa information
-    fun updatePsrta(id_peserta: Int, peserta: Peserta) {
-        viewModelScope.launch {
-            try {
-                psrta.updatePeserta(id_peserta, peserta)
-
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    // Update the UI state with a new InsertUiEvent
-    fun updatePesertaState(insertPesertaUiEvent: InsertPesertaUiEvent) {
-        PesertauiState.value = PesertauiState.value.copy(insertPesertaUiEvent = insertPesertaUiEvent)
     }
 }
-
-fun Peserta.toInsertPesertaUIEvent(): InsertPesertaUiState = InsertPesertaUiState(
-    insertPesertaUiEvent = this.toDetailPesertaUiEvent()
-)
