@@ -79,82 +79,59 @@ fun DetailEventScreen(
     val errorMessage = viewModel.uiState.errorMessage
     Scaffold(
         topBar = {
-            CostumeTopAppBar(
-                title = DestinasiDetailEvent.titleRes,
-                canNavigateBack = true,
-
-                navigateUp = navigateBack,
-                onRefresh = { viewModel.getDetailEvent() } // Trigger refresh action on refresh
+            CenterAlignedTopAppBar(
+                title = { Text("Detail Event")},
+                navigationIcon = {
+                    IconButton(onClick = {onBackClick() }) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors()
+            )
+        },
+        bottomBar = {
+            BottomAppBarDefaults(
+                navController = rememberNavController(),
+                onEventClick = onEventClick,
+                onPesertaClick = onPesertaClick,
+                onTiketClick = onTiketClick,
+                onTransaksiClick = onTransaksiClick
             )
         },
         floatingActionButton = {
-            if (detailEventUiState is DetailEventlUiState.Success) { // Ditambahkan
-                val event = (detailEventUiState as DetailEventlUiState.Success).event
-                FloatingActionButton(
-                    onClick = { onEditClick(IdEvent) },
-                    shape = MaterialTheme.shapes.medium,
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit Mahasiswa"
-                    )
-                }
-            }
-        }
-    ) { innerPadding ->
-        val detailEventUiState by viewModel.detailEventlUiState.collectAsState()
-
-        BodyDetailEvent(
-            modifier = Modifier.padding(innerPadding),
-            detailEventUiState = detailEventUiState,
-            retryAction = { viewModel.getDetailEvent() }
-        )
-    }
-}
-
-@Composable
-fun BodyDetailEvent(
-    modifier: Modifier = Modifier,
-    detailEventUiState: DetailEventlUiState,
-    retryAction: () -> Unit = {}
-) {
-    when (detailEventUiState) {
-        is DetailEventlUiState.Loading -> {
-            // Menampilkan gambar loading saat data sedang dimuat
-            OnLoading(modifier = modifier.fillMaxSize())
-        }
-        is DetailEventlUiState.Success -> {
-            // Menampilkan detail mahasiswa jika berhasil
-            Column(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+            FloatingActionButton(
+                onClick = { onEditClick(event.id_event) },
+                modifier = Modifier.padding(16.dp)
             ) {
-                ItemDetailEvents(event = detailEventUiState.event)
+                Icon(imageVector = Icons.Filled.Edit, contentDescription = "Edit Event")
             }
-        }
-        is DetailEventlUiState.Error -> {
-            // Menampilkan error jika data gagal dimuat
-            OnError(
-                retryAction = retryAction,
-                modifier = modifier.fillMaxSize()
-            )
-        }
-        else -> {
-            // Menangani kasus yang tidak terduga (optional, jika Anda ingin menangani hal ini)
-            // Anda bisa menambahkan logika untuk menangani kesalahan yang tidak diketahui
-            Text("Unexpected state encountered")
-        }
-    }
-
-}
-
-@Composable
-fun ItemDetailEvents(
-    event: Event
-) {
-    Card(
+        },
+        content = { paddingValues ->
+            Box (
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                } else if (isError) {
+                    Text(
+                        text = errorMessage,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                } else if (viewModel.uiState.isUiEventNotEmpty) {
+                    Column (
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                    Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
