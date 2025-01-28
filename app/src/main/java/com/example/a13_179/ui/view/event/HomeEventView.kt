@@ -81,7 +81,15 @@ fun HomeEventScreen(
 
             )
         },
-
+        bottomBar = {
+            BottomAppBarDefaults(
+                navController = rememberNavController(),
+                onEventClick = onEventClick,
+                onPesertaClick = onPesertaClick,
+                onTiketClick = onTiketClick,
+                onTransaksiClick = onTransaksiClick
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = navigateToItemEntry,
@@ -93,16 +101,15 @@ fun HomeEventScreen(
         },
     ) { innerPadding ->
         HomeEventStatus(
-            homeEventUiState = viewModel.eventUIState,
-            retryAction = {viewModel.getEventList()}, modifier = Modifier.padding(innerPadding),
-            onDetailClick = onDetailClick,onDeleteClick = {
-                viewModel.deleteEvents(it.id_event)
-                viewModel.getEventList()
-                }
+            homeEventUiState = viewModel.evntUiState,
+            retryAction = { viewModel.getEvnt() }, modifier = Modifier.padding(innerPadding),
+            onDetailClick = onDetailClick, onDeleteClick = {
+                it.id_event?.let { id ->
+                    viewModel.deleteEvnt(it.id_event)
+                    viewModel.getEvnt()
             }
-        )
-    }
-}
+    })
+}}
 
 @Composable
 fun HomeEventStatus(
