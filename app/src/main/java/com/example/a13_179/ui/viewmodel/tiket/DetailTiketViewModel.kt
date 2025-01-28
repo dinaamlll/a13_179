@@ -1,5 +1,8 @@
 package com.example.a13_179.ui.viewmodel.tiket
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,60 +12,54 @@ import com.example.a13_179.repository.PesertaRepository
 import com.example.a13_179.repository.TiketRepository
 import com.example.a13_179.ui.view.peserta.DestinasiDetailPeserta
 import com.example.a13_179.ui.view.tiket.DestinasiDetailTiket
+import com.example.a13_179.ui.viewmodel.peserta.DetailPesertaUiState
+import com.example.a13_179.ui.viewmodel.peserta.InsertPesertaUiEvent
+import com.example.a13_179.ui.viewmodel.peserta.toDetailPesertaUiEvent
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-sealed class DetailTiketUiState {
-    data class Success(val tiket:Tiket) : DetailTiketUiState()
-    object Error : DetailTiketUiState()
-    object Loading : DetailTiketUiState()
-}
-
 class DetailTiketViewModel(
     savedStateHandle: SavedStateHandle,
-    private val tkt: TiketRepository
+    private val tiketRepository: TiketRepository
 ) : ViewModel() {
 
-    private val _idTiket: Int = savedStateHandle.get<String>(DestinasiDetailTiket.ID_TIKET)
-        ?.toIntOrNull()
-        ?: throw IllegalArgumentException("Invalid ID_PESERTA value")
+    var uiState by mutableStateOf(DetailTiketUiState())
+        private set
     // StateFlow untuk menyimpan status UI
-    private val _detailTiketUiState = MutableStateFlow<DetailTiketUiState>(DetailTiketUiState.Loading)
-    val detailTiketUiState: StateFlow<DetailTiketUiState> = _detailTiketUiState
 
-    init {
-        getDetailTiket()
-    }
-
-    fun getDetailTiket() {
+    fun getDetailTiket(id_tiket: Int) {
         viewModelScope.launch {
+            uiState = DetailTiketUiState(isLoading = true)
             try {
-                // Set loading state
-                _detailTiketUiState.value = DetailTiketUiState.Loading
+                val tiket = tiketRepository.getTiketById(id_tiket)
 
-                // Fetch mahasiswa data dari repository
-                val tiket = tkt.getTiketById(_idTiket)
-
-                if (tiket != null) {
-                    // Jika data ditemukan, emit sukses
-                    _detailTiketUiState.value = DetailTiketUiState.Success(tiket)
-                } else {
-                    // Jika data tidak ditemukan, emit error
-                    _detailTiketUiState.value = DetailTiketUiState.Error
-                }
+                // Mengubah state dengan data tiket yang diterima
+                uiState = DetailTiketUiState(detailTiketUiEvent = tiket.toDetailTiketUiEvent())
             } catch (e: Exception) {
-                // Emit error jika terjadi exception
-                _detailTiketUiState.value = DetailTiketUiState.Error
+                e.printStackTrace()
+
+                // Menangani error jika request gagal
+                uiState = DetailTiketUiState(isError = true, errorMessage = "Failed to fetch details: ${e.message}")
             }
         }
     }
 }
 
-//memindahkan data dari entity ke ui
+data class DetailTiketUiState(
+    val detailTiketUiEvent: InsertTiketUiEvent = InsertTiketUiEvent(),
+    val isLoading: Boolean = false,
+    val isError: Boolean = false,
+    val errorMessage: String = "",
+) {
+    val isUiEventNotEmpty: Boolean
+        get() = detailTiketUiEvent != InsertTiketUiEvent()
+}
+
+// memindahkan data dari entity ke UI
 fun Tiket.toDetailTiketUiEvent(): InsertTiketUiEvent {
     return InsertTiketUiEvent(
         id_tiket = id_tiket,
-        kapasitas_tiket = kapasitas_tiket,
-        harga_tiket = harga_tiket
+        kapasitas_tiket = kapasitas_tiket, // Pastikan ini bertipe Int
+        harga_tiket = harga_tiket // Pastikan ini bertipe Int
     )
 }
