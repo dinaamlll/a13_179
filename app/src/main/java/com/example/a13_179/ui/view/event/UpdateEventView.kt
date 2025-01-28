@@ -56,36 +56,32 @@ fun UpdateEventScreen(
                 title = DestinasiUpdateEvent.titleRes,
                 canNavigateBack = true,
                 scrollBehavior = scrollBehavior,
-                navigateUp = navigateBack
+                onBackClick = onBackClick,
+            )
+        },
+        bottomBar = {
+            BottomAppBarDefaults(
+                navController = rememberNavController(),
+                onEventClick = onEventClick,
+                onPesertaClick = onPesertaClick,
+                onTiketClick = onTiketClick,
+                onTransaksiClick = onTransaksiClick
             )
         }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
-        ) {
-            // Pass the onDateSelected function to EntryBodyEvent
-            EntryBodyEvent(
-                insertEventUiState = EventuiState,
-                onEventValueChange = { updatedValue ->
-                    viewModel.updateEventState(updatedValue) // Update ViewModel state
-                },
-                onSaveClick = {
-                    EventuiState.insertEventUiEvent?.let { insertEventUiEvent ->
-                        coroutineScope.launch {
-                            // Call ViewModel update method
-                            viewModel.updateEvents(
-                                id_event = viewModel.id_event, // Pass the NIM from ViewModel
-                                event = insertEventUiEvent.toEvent() // Convert InsertUiEvent to Event
-                            )
-                            navigateBack() // Navigate back after saving
-                        }
+    ){padding ->
+        EntryBodyEvent(
+            modifier = Modifier.padding(padding),
+            insertEventUiState = viewModel.updateEventUiState,
+            onEventValueChange = viewModel::updateInsertEventState,
+            onSaveClick = {
+                coroutineScope.launch {
+                    viewModel.updateEvent()
+                    delay(600)
+                    withContext(Dispatchers.Main) {
+                        onNavigate()
                     }
-                },
-                onDateSelected = onDateSelected // Pass the onDateSelected function
-            )
-        }
+                }
+            }
+        )
     }
 }
