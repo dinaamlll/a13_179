@@ -68,7 +68,15 @@ fun DetailEventScreen(
     onEditClick: (Int) -> Unit,  // Change here
     onBackClick: () -> Unit
 ) {
-    val detailEventUiState by viewModel.detailEventlUiState.collectAsState()
+    val event = viewModel.uiState.detailEventUiEvent
+
+    LaunchedEffect(id_event) {
+        viewModel.getDetailEvent(id_event)
+    }
+
+    val isLoading = viewModel.uiState.isLoading
+    val isError = viewModel.uiState.isError
+    val errorMessage = viewModel.uiState.errorMessage
     Scaffold(
         topBar = {
             CostumeTopAppBar(
