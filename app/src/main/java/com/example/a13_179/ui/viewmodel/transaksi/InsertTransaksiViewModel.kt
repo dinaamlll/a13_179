@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.a13_179.model.Tiket
 import com.example.a13_179.model.Transaksi
 import com.example.a13_179.repository.TransaksiRepository
 import kotlinx.coroutines.launch
@@ -15,6 +16,7 @@ class InsertTransaksiViewModel(private val trnsksi: TransaksiRepository) : ViewM
 
     fun updateInsertTrnsksiState(insertTransaksiUiEvent: InsertTransaksiUiEvent) {
         TransaksiuiState = InsertTransaksiUiState(insertTransaksiUiEvent =insertTransaksiUiEvent)
+
     }
 
     suspend fun insertTrnsksi() {
@@ -33,18 +35,15 @@ data class InsertTransaksiUiState(
 )
 
 data class InsertTransaksiUiEvent(
-    val id_transaksi: Int? = null,  //  Int? untuk memungkinkan nilai null
-    val nama_peserta: String ="",
-    val nama_event: String ="",
+    val id_transaksi: Int = 0 , //  Int? untuk memungkinkan nilai null
     val id_tiket: Int? = null,
     val jumlah_tiket: Int? = null,
     val jumlah_pembayaran: Int? = null,
     val tanggal_transaksi:String = "",
+    val tiketList: List<Tiket> = emptyList()
 )
 fun InsertTransaksiUiEvent.toTrnsksi(): Transaksi = Transaksi(
     id_transaksi = id_transaksi ?: 0,
-    nama_peserta =nama_peserta,
-    nama_event = nama_event,
     id_tiket = id_tiket ?: 0,
     jumlah_tiket = jumlah_tiket ?: 0,
     jumlah_pembayaran = jumlah_pembayaran ?: 0,
