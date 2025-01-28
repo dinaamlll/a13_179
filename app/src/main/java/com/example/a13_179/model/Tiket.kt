@@ -20,7 +20,7 @@ data class DetailTiketResponse(
 data class Tiket(
     val id_tiket: Int,
     val id_event: Int,
-    val id_pengguna: Int,
-    val kapasitas_tiket: String,
-    val harga_tiket: String
+    val id_peserta: Int,
+    val kapasitas_tiket: Int,
+    val harga_tiket: Int
 )
