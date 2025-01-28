@@ -9,18 +9,21 @@ import com.example.a13_179.model.Peserta
 import com.example.a13_179.repository.PesertaRepository
 import kotlinx.coroutines.launch
 
-class InsertPesertaViewModel(private val psrta: PesertaRepository) : ViewModel() {
-    var PesertauiState by mutableStateOf(InsertPesertaUiState())
+class InsertPesertaViewModel(
+    private val peserta: PesertaRepository
+): ViewModel() {
+    var uiState by mutableStateOf(InsertPesertaUiState())
+        private set
 
-    fun updateInsertPsrtaState(insertPesertaUiEvent: InsertPesertaUiEvent) {
-        PesertauiState = InsertPesertaUiState(insertPesertaUiEvent =insertPesertaUiEvent)
+    fun updateInsertPesertaState(insertPesertaUiEvent: InsertPesertaUiEvent){
+        uiState = InsertPesertaUiState(insertPesertaUiEvent = insertPesertaUiEvent)
     }
 
-    suspend fun insertPsrta() {
+    fun insertPeserta() {
         viewModelScope.launch {
             try {
-                psrta.insertPeserta(PesertauiState.insertPesertaUiEvent.toPsrta())
-            }catch (e:Exception){
+                peserta.insertPeserta(uiState.insertPesertaUiEvent.toPsrta())
+            } catch (e:Exception){
                 e.printStackTrace()
             }
         }
@@ -30,22 +33,25 @@ class InsertPesertaViewModel(private val psrta: PesertaRepository) : ViewModel()
 data class InsertPesertaUiState(
     val insertPesertaUiEvent: InsertPesertaUiEvent = InsertPesertaUiEvent()
 )
-
 data class InsertPesertaUiEvent(
-    val id_peserta: Int? = null,  //  Int? untuk memungkinkan nilai null
-    val nama_peserta:String = "",
-    val email:String = "",
-    val nomor_telepon:String = "",
+    val id_peserta: Int = 0,
+    val nama_peserta: String = "",
+    val email: String = "",
+    val nomor_telepon: String = "",
 )
+
 fun InsertPesertaUiEvent.toPsrta(): Peserta = Peserta(
-    id_peserta = id_peserta ?: 0,
+    id_peserta = id_peserta,
     nama_peserta = nama_peserta,
     email = email,
     nomor_telepon = nomor_telepon
 )
 
-fun Peserta.toInsertPesertaUiEvent():InsertPesertaUiEvent = InsertPesertaUiEvent(
-    id_peserta= id_peserta,
+fun Peserta.toPesertaUiState(): InsertPesertaUiState = InsertPesertaUiState(
+    insertPesertaUiEvent = toInsertPesertaUiEvent()
+)
+fun Peserta.toInsertPesertaUiEvent(): InsertPesertaUiEvent = InsertPesertaUiEvent(
+    id_peserta = id_peserta,
     nama_peserta = nama_peserta,
     email = email,
     nomor_telepon = nomor_telepon
