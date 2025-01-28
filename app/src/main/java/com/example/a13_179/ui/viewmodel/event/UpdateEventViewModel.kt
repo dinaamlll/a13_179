@@ -30,42 +30,29 @@ class UpdateEventViewModel(
         checkNotNull(savedStateHandle[DestinasiUpdateEvent.id_event])
 
     init {
-        ambilEvent()
+        // Ambil data peserta berdasarkan ID saat ViewModel diinisialisasi
+        viewModelScope.launch {
+            updateEventUiState = repositoryEvent
+                .getEventById(_id_event).toEventUiState()
+        }
     }
 
-    // Fetch the student data using NIM
-    private fun ambilEvent() {
+    // Fungsi untuk memperbarui UI state dengan event baru
+    fun updateInsertEventState(insertEventUiEvent: InsertEventUiEvent) {
+        updateEventUiState = InsertEventUiState(insertEventUiEvent = insertEventUiEvent)
+    }
+
+    // Fungsi untuk memperbarui peserta di repository
+    fun updateEvent() {
         viewModelScope.launch {
             try {
-                val event = evnt.getEventById(id_event)
-                event?.let {
-                    EventuiState.value = it.toInsertUIEvent() // Update state with the fetched data
-                }
+                repositoryEvent.updateEvent(
+                    _id_event,
+                    updateEventUiState.insertEventUiEvent.toEvent()
+                )
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
-    }
-
-    // Update the mahasiswa information
-    fun updateEvents(id_event: Int, event: Event) {
-        viewModelScope.launch {
-            try {
-                evnt.updateEvent(id_event, event)
-
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    // Update the UI state with a new InsertUiEvent
-    fun updateEventState(insertEventUiEvent: InsertEventUiEvent) {
-        EventuiState.value = EventuiState.value.copy(insertEventUiEvent = insertEventUiEvent)
     }
 }
-
-fun Event.toInsertUIEvent(): InsertEventUiState = InsertEventUiState(
-    insertEventUiEvent = this.toDetaiEventlUiEvent()
-)
