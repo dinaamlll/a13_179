@@ -20,7 +20,7 @@ data class DetailTransaksiResponse(
 data class Transaksi(
     val id_transaksi: Int,
     val id_tiket: Int,
-    val jumlah_tiket: String,
-    val jumlah_pembayaran: String,
+    val jumlah_tiket: Int,
+    val jumlah_pembayaran: Int,
     val tanggal_transaksi: String
 )
